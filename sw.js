@@ -4,7 +4,7 @@
  * 지도(map.jpg, 약 1MB)는 따로 보관해서 VERSION을 올려도 다시 받지 않아요.
  * 지도 이미지를 바꿀 때만 MAP_CACHE 숫자를 올려 주세요.
  */
-const VERSION = 'hanumul-v6';
+const VERSION = 'hanumul-v7';
 const MAP_CACHE = 'hanumul-map-1';
 const CORE = ['./', 'index.html', 'emblem.png', 'manifest.webmanifest', 'icon-192.png'];
 
@@ -14,7 +14,8 @@ self.addEventListener('install', (e) => {
     await c.addAll(CORE);
     await c.add('data.json').catch(() => {});
     const m = await caches.open(MAP_CACHE);
-    if (!(await m.match('map.jpg'))) await m.add('map.jpg').catch(() => {});
+    // 브라우저에 남은 예전 응답(404 등)을 쓰지 않고 서버에서 새로 받음
+    if (!(await m.match('map.jpg', { ignoreSearch: true }))) await m.add(new Request('map.jpg', { cache: 'reload' })).catch(() => {});
     await self.skipWaiting();
   })());
 });
@@ -47,7 +48,7 @@ async function cacheFirst(req, name) {
   const c = await caches.open(name || VERSION);
   const hit = await c.match(req, { ignoreSearch: true });
   if (hit) return hit;
-  const res = await fetch(req);
+  const res = await fetch(req, { cache: 'no-cache' }); // 브라우저에 남은 오래된 응답 대신 서버에 확인
   if (res && res.ok) c.put(req, res.clone());
   return res;
 }

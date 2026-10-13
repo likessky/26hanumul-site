@@ -279,7 +279,7 @@ footer{color:var(--muted);font-size:12px;text-align:center}
    ========================================================= */
 var DATA_URL = 'data.json';
 var SAVE_URL = 'api/save';
-var MAP_IMAGE = 'map.jpg';   // 서울랜드 가이드맵.pdf에서 뽑은 이미지
+var MAP_IMAGE = 'map.jpg?v=2'; // 서울랜드 가이드맵.pdf에서 뽑은 이미지 (?v= 숫자는 예전에 남은 404 기록을 피하려고 붙임)
 var MAP_W = 2440, MAP_H = 1732; // map.jpg 크기(px). 이미지를 바꾸면 같이 바꿔 주세요
 var POLL_MS = 3 * 60 * 1000; // 새 내용 확인 간격(3분, 사람마다 조금씩 어긋나게)
 
@@ -361,7 +361,7 @@ function vSafety(){
 /* ---------- map ---------- */
 function mapHtml(pins,opts){
   opts=opts||{};
-  if(mapOk===false)return'<div class="mapbox"><div class="mapempty"><b>지도 이미지를 불러오지 못했어요</b><span>인터넷 연결을 확인하거나 아래 서울랜드 홈페이지 지도를 열어 보세요.</span></div></div>';
+  if(mapOk===false)return'<div class="mapbox"><div class="mapempty"><b>지도 이미지를 불러오지 못했어요</b><span>인터넷 연결을 확인하고 다시 불러오거나, 아래 서울랜드 홈페이지 지도를 열어 보세요.</span><span><button class="btn small primary" data-act="mapretry">다시 불러오기</button></span></div></div>';
   var pinHtml=pins.map(function(p,i){if(p.x==null||p.y==null)return'';var sel=(opts.sel===i);
     return'<button class="pin k-'+esc(p.kind)+(sel?' sel':'')+'" style="left:'+p.x+'%;top:'+p.y+'%" data-pin="'+i+'" aria-label="'+esc(p.label)+'">'+(i+1)+(sel?'<span class="lbl">'+esc(p.label)+'</span>':'')+'</button>'}).join('');
   return'<div class="mapbox" id="mapbox"><div class="mapinner'+(opts.placing?' placing':'')+'" id="mapinner" style="--z:'+(zoom||1)+'"><img src="'+esc(MAP_IMAGE)+'" alt="서울랜드 가이드맵" id="mapimg" width="'+MAP_W+'" height="'+MAP_H+'" draggable="false" decoding="async">'+pinHtml+'</div></div>';
@@ -462,7 +462,8 @@ function renderInner(){
 var drag=null,pinch=null,noClick=false;
 function wireMap(){
   var img=document.getElementById('mapimg'),box=document.getElementById('mapbox');if(!img||!box)return;
-  if(mapOk===null){img.addEventListener('error',function(){mapOk=false;render()});img.addEventListener('load',function(){mapOk=true})}
+  /* 한 번 실패하면 주소를 바꿔 한 번 더 받아 보고, 그래도 안 되면 안내 + 다시 불러오기 버튼 */
+  if(mapOk===null){img.addEventListener('error',function(){if(!img.dataset.retry){img.dataset.retry='1';img.src=MAP_IMAGE+'&r='+Date.now();return}mapOk=false;render()});img.addEventListener('load',function(){mapOk=true})}
   /* 처음 열 때: 높이에 꽉 차게 확대하고 선택한 곳(없으면 공연장)을 가운데로 */
   if(zoom==null){
     var pins=(mode==='edit'?draft:S).pins,c=pins[selPin];
@@ -578,6 +579,7 @@ app.addEventListener('click',function(ev){
   if(b.dataset.copy!=null){var t=b.dataset.copy,ok=function(){b.textContent='복사됨';setTimeout(function(){b.textContent='복사'},1500)};
     if(navigator.clipboard)navigator.clipboard.writeText(t).then(ok,function(){});return}
   var a=b.dataset.act;
+  if(a==='mapretry'){mapOk=null;zoom=null;render();return}
   if(a==='mapfull'){mapFull=!mapFull;zoom=null;var yf=window.scrollY;render();if(!mapFull)window.scrollTo(0,yf);return}
   if(a==='login'||a==='cancel')mapFull=false;
   if(a==='login'){loginErr='';mode=adminPw?'edit':'login';if(mode==='edit'){draft=JSON.parse(JSON.stringify(S))}render();window.scrollTo({top:0});return}
