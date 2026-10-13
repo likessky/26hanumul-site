@@ -76,26 +76,26 @@
    {
     "label": "이벤트홀 (한우물제 공연장)",
     "kind": "stage",
-    "x": null,
-    "y": null
+    "x": 32.79,
+    "y": 14.72
    },
    {
     "label": "16:00 집결 장소",
     "kind": "meet",
-    "x": null,
-    "y": null
+    "x": 39.34,
+    "y": 63.22
    },
    {
     "label": "의무실",
     "kind": "aid",
-    "x": null,
-    "y": null
+    "x": 16.68,
+    "y": 46.59
    },
    {
     "label": "안내소",
     "kind": "info",
-    "x": null,
-    "y": null
+    "x": 37.34,
+    "y": 54.97
    },
    {
     "label": "선생님 대기 위치",
