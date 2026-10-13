@@ -4,7 +4,7 @@
  * 지도(map.jpg, 약 1MB)는 따로 보관해서 VERSION을 올려도 다시 받지 않아요.
  * 지도 이미지를 바꿀 때만 MAP_CACHE 숫자를 올려 주세요.
  */
-const VERSION = 'hanumul-v7';
+const VERSION = 'hanumul-v8';
 const MAP_CACHE = 'hanumul-map-1';
 const CORE = ['./', 'index.html', 'emblem.png', 'manifest.webmanifest', 'icon-192.png'];
 
@@ -59,6 +59,7 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;      // 서울랜드 홈페이지 등 외부는 그대로
   if (url.pathname.startsWith('/api/')) return;          // 저장 요청은 그대로
+  if (url.pathname.endsWith('/announce.json')) return;   // 공지는 항상 네트워크로 (오프라인에서 예전 공지를 다시 띄우지 않도록)
   if (req.mode === 'navigate') { e.respondWith(networkFirst(req, 3500, 'index.html')); return; }
   if (url.pathname.endsWith('/data.json')) { e.respondWith(networkFirst(req, 4000, null, true)); return; }
   if (url.pathname.endsWith('/map.jpg')) { e.respondWith(cacheFirst(req, MAP_CACHE)); return; }

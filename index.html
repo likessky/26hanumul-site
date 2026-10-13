@@ -26,7 +26,7 @@
   --pin-ring:#FFFFFF; --on-color:#FFFFFF; --emblem-bg:#FFFFFF; --label-bg:#262626; --map-bg:#E3F1FA; --shadow:0 4px 12px rgba(0,0,0,.10);
   --f-body:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Segoe UI","Malgun Gothic","Noto Sans KR",sans-serif;
   --f-mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
-  --nav-h:58px; color-scheme:light;
+  --nav-h:62px; color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#000000; --subtle:#121212; --fill:#262626; --line:#2E2E2E; --ink:#FAFAFA; --muted:#A8A8A8;
@@ -39,7 +39,7 @@
   --c-perf:#F27AB5; --c-perf-bg:#3A1022; --c-video:#9AA6FF; --c-video-bg:#1E2147; --c-cer:#C7C7C7; --c-cer-bg:#262626;
   --k-teacher:#424242; --shadow:0 4px 12px rgba(0,0,0,.6); color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%}
 img{max-width:100%}
 [hidden]{display:none!important}
 .wrap{max-width:760px;margin:0 auto;padding:0 16px calc(var(--nav-h) + 32px + env(safe-area-inset-bottom,0px));display:grid;gap:20px}
@@ -49,46 +49,63 @@ button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--action);outline-offset:2px}
 .mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 
-/* 프로필 헤더 */
-.topbar{position:sticky;top:0;z-index:5;background:var(--bg);margin-inline:-16px;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
-.topbar b{font-size:17px;font-weight:700;letter-spacing:-.01em}
+/* 위쪽 바 + 메인 히어로 */
+.topbar{position:sticky;top:0;z-index:5;background:var(--bg);margin-inline:-16px;padding:calc(8px + env(safe-area-inset-top,0px)) 16px 8px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+.topbar img{width:30px;height:30px;border-radius:50%;background:var(--emblem-bg);padding:2px;border:1px solid var(--line);flex:none}
+.topbar b{font-size:16px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .topbar .sp{flex:1}
-.profile{display:grid;grid-template-columns:auto 1fr;gap:6px 24px;align-items:center}
-.ring{width:92px;height:92px;border-radius:50%;padding:3px;background:linear-gradient(45deg,var(--ig1),var(--ig2) 35%,var(--ig3) 62%,var(--ig4) 82%,var(--ig5))}
-.ring img{display:block;width:100%;height:100%;border-radius:50%;border:3px solid var(--bg);background:var(--emblem-bg);padding:4px}
-.pmain{min-width:0;display:grid;gap:10px}
-.pmain h1{font-size:22px;line-height:1.2;font-weight:700;letter-spacing:-.01em}
-.stats{list-style:none;margin:0;padding:0;display:flex;gap:22px}
-.stats li{display:grid;font-size:13px;color:var(--muted);line-height:1.3}
-.stats b{font-size:17px;color:var(--ink);font-weight:700}
-.bio{display:grid;gap:2px;font-size:14px}
-.bio span{color:var(--muted)}
-.status{display:flex;align-items:center;gap:10px;background:var(--subtle);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px}
+.hero{display:grid;justify-items:center;text-align:center;gap:8px;padding:18px 0 2px}
+.ring{width:112px;height:112px;border-radius:50%;padding:4px;background:linear-gradient(45deg,var(--ig1),var(--ig2) 35%,var(--ig3) 62%,var(--ig4) 82%,var(--ig5))}
+.ring img{display:block;width:100%;height:100%;border-radius:50%;border:4px solid var(--bg);background:var(--emblem-bg);padding:5px}
+.eyebrow{margin:6px 0 0;font-size:15px;font-weight:700;color:var(--muted);letter-spacing:.06em}
+.hero h1{font-size:clamp(34px,10vw,44px);line-height:1.1;font-weight:800;letter-spacing:-.03em}
+.hero h1 span{background:linear-gradient(45deg,var(--ig2),var(--ig3) 50%,var(--ig4));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.pill{background:var(--fill);border-radius:9999px;padding:5px 14px;font-size:15px;font-weight:600}
+.status{display:flex;align-items:center;gap:10px;background:var(--subtle);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:16px;font-weight:600}
 .status .tag{flex:none}
-.tag{display:inline-flex;align-items:center;padding:2px 10px;border-radius:9999px;font-size:12px;font-weight:700;line-height:18px;background:var(--accent);color:var(--on-color)}
-@media (max-width:400px){.profile{gap:6px 16px}.ring{width:76px;height:76px}.stats{gap:16px}.pmain h1{font-size:20px}}
+.tag{display:inline-flex;align-items:center;padding:2px 12px;border-radius:9999px;font-size:14px;font-weight:700;line-height:22px;background:var(--accent);color:var(--on-color)}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fact{all:unset;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:2px;align-content:start;min-width:0}
+button.fact{cursor:pointer}
+.fact small{font-size:14px;color:var(--muted);font-weight:600}
+.fact b{font-size:24px;line-height:1.2;font-weight:800;letter-spacing:-.01em}
+.fact b.txt{font-size:18px;line-height:1.3}
+.fact em{font-style:normal;font-size:13px;color:var(--action);font-weight:700}
 
+/* 공지 (화면 전체) + 공지 띠 */
+.ann{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.74);display:grid;place-items:center;padding:20px;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:auto}
+.ann-card{width:100%;max-width:520px;background:var(--bg);color:var(--ink);border-radius:20px;padding:28px 22px 22px;display:grid;gap:16px;justify-items:center;text-align:center;box-shadow:0 16px 32px rgba(225,48,108,.25)}
+.ann-text{margin:0;font-size:clamp(26px,7.5vw,36px);line-height:1.35;font-weight:800;word-break:keep-all;white-space:pre-wrap;overflow-wrap:anywhere}
+.ann-hint{font-size:15px;color:var(--muted);font-weight:600}
+.ann-time{font-size:14px;color:var(--muted)}
+.annbar{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:center;width:100%;background:var(--accent-soft);color:var(--ink);border-radius:12px;padding:10px 14px;font-size:16px;font-weight:700;cursor:pointer}
+.presets{display:grid;gap:6px}
+.presets .btn{white-space:normal;height:auto;min-height:36px;padding:8px 12px;text-align:left;justify-content:flex-start;line-height:1.4}
+.annbar span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (prefers-reduced-motion:no-preference){.ann-card{animation:pop .25s cubic-bezier(.34,1.56,.64,1)}@keyframes pop{from{transform:scale(.92);opacity:0}}}
+@media (max-width:400px){.ring{width:96px;height:96px}}
 /* 아래 고정 탭 (인스타그램 앱 하단 바) */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--bg);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
 .nav div{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
-.tab{border:0;background:none;height:var(--nav-h);display:grid;place-items:center;align-content:center;gap:3px;cursor:pointer;color:var(--muted);font-size:11px;font-weight:600;padding:0 2px;white-space:nowrap}
+.tab{border:0;background:none;height:var(--nav-h);display:grid;place-items:center;align-content:center;gap:3px;cursor:pointer;color:var(--muted);font-size:12px;font-weight:600;padding:0 2px;white-space:nowrap}
 .tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tab[aria-selected="true"]{color:var(--ink)}
 .tab[aria-selected="true"] svg{stroke-width:2.6}
 
-.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;font-size:13px;color:var(--muted)}
-.btn{border:0;background:var(--fill);color:var(--ink);border-radius:8px;height:36px;padding:0 16px;font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;font-size:14px;color:var(--muted)}
+.btn{border:0;background:var(--fill);color:var(--ink);border-radius:8px;height:40px;padding:0 18px;font-weight:600;font-size:15px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
 .btn.primary{background:var(--action);color:var(--action-ink)}
-.btn.small{height:30px;padding:0 12px;font-size:13px}
+.btn.small{height:34px;padding:0 14px;font-size:14px}
 .btn:disabled{opacity:.4;cursor:default}
 
 section.view{display:grid;gap:16px}
 .sec-h{display:grid;gap:2px}
-.sec-h h2{font-size:20px;font-weight:700}
-.sec-h p{margin:0;color:var(--muted);font-size:14px}
+.sec-h h2{font-size:22px;font-weight:800;letter-spacing:-.01em}
+.sec-h p{margin:0;color:var(--muted);font-size:15px}
 
 .filters{display:flex;gap:8px;flex-wrap:wrap}
-.chipbtn{border:0;background:var(--fill);border-radius:8px;height:32px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;color:var(--ink)}
+.chipbtn{border:0;background:var(--fill);border-radius:8px;height:36px;padding:0 16px;font-size:15px;font-weight:600;cursor:pointer;color:var(--ink)}
 .chipbtn[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 
 /* 식순: 스토리 링 번호 + 제목 (공연은 컬러 링, 나머지는 회색 링) */
@@ -98,19 +115,19 @@ section.view{display:grid;gap:16px}
 .no.perf{background:linear-gradient(45deg,var(--ig1),var(--ig2) 35%,var(--ig3) 62%,var(--ig4) 82%,var(--ig5))}
 .no span{border-radius:50%;border:2px solid var(--bg);background:var(--subtle);display:grid;place-items:center;font:700 15px/1 var(--f-mono)}
 .row .body{min-width:0;display:grid;gap:3px;justify-items:start}
-.row .title{font-weight:600;line-height:1.35}
-.chip{display:inline-block;font-size:12px;font-weight:700;border-radius:9999px;padding:1px 9px;line-height:18px}
+.row .title{font-weight:600;font-size:17px;line-height:1.4}
+.chip{display:inline-block;font-size:13px;font-weight:700;border-radius:9999px;padding:1px 9px;line-height:18px}
 .chip.cer{color:var(--c-cer);background:var(--c-cer-bg)}.chip.perf{color:var(--c-perf);background:var(--c-perf-bg)}.chip.video{color:var(--c-video);background:var(--c-video-bg)}
 
 .card{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:16px;display:grid;gap:10px}
-.card h3{font-size:16px;font-weight:700}
+.card h3{font-size:18px;font-weight:700}
 .rules{margin:0;padding-left:20px;display:grid;gap:6px}
 .steps{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;gap:10px}
 .steps li{counter-increment:s;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
 .steps li::before{content:counter(s);font:700 14px/1 var(--f-mono);width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--danger-soft);color:var(--danger-ink)}
 .evac{border-color:var(--danger)}
 .evac h3{color:var(--danger-ink)}
-.callout{font-size:14px;background:var(--subtle);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:0}
+.callout{font-size:15px;background:var(--subtle);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:0}
 
 .meet{border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;grid-template-columns:auto 1fr auto;gap:6px 16px;align-items:center;box-shadow:var(--shadow)}
 .meet .clock{font-size:40px;line-height:1;font-weight:700;letter-spacing:-.02em}
@@ -135,7 +152,7 @@ section.view{display:grid;gap:16px}
 
 .sit{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
 .sit .card{gap:6px}
-.sit p{margin:0;font-size:14px}
+.sit p{margin:0;font-size:15px}
 .list{display:grid;border:1px solid var(--line);border-radius:8px;overflow:hidden;list-style:none;margin:0;padding:0}
 .ct{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 16px;border-top:1px solid var(--line);align-items:center}
 .ct:first-child{border-top:0}
@@ -282,6 +299,7 @@ var SAVE_URL = 'api/save';
 var MAP_IMAGE = 'map.jpg?v=2'; // 서울랜드 가이드맵.pdf에서 뽑은 이미지 (?v= 숫자는 예전에 남은 404 기록을 피하려고 붙임)
 var MAP_W = 2440, MAP_H = 1732; // map.jpg 크기(px). 이미지를 바꾸면 같이 바꿔 주세요
 var POLL_MS = 3 * 60 * 1000; // 새 내용 확인 간격(3분, 사람마다 조금씩 어긋나게)
+var ANN_MS = 60 * 1000;     // 공지 확인 간격(1분, 사람마다 조금씩 어긋나게)
 
 (function(){
 var DEFAULT=JSON.parse(document.getElementById('state').textContent);
@@ -320,21 +338,27 @@ function status(){
   return{phase:'home',n:n};
 }
 
-/* 인스타그램 프로필처럼: 교표 스토리 링 + 숫자 3개 + 소개 + 지금 상태 */
-function header(st){
+/* 위쪽 바: 교표 + 학교·행사 이름 + 연결 상태 (모든 탭 공통) */
+function header(){
+  return '<header class="topbar"><img src="emblem.png" alt="" width="30" height="30"><b>'+esc(S.school)+' '+esc(S.title)+' 축제</b><span class="sp"></span>'+netChip()+'</header>';
+}
+/* 메인(식순 탭) 맨 위: 큰 교표 링 + 행사 이름 + 지금 상태 + 꼭 알아야 할 정보 4칸 */
+function hero(st){
   var tag,txt;
   if(st.phase==='before'){tag='D-'+st.days;txt=esc(S.start)+' 시작 · '+esc(S.meetTime)+' 집결'}
   else if(st.phase==='pre'){tag='오늘';txt=esc(S.start)+' 개회까지 '+dur(st.left)}
   else if(st.phase==='day'){tag='진행 중';txt=esc(S.meetTime)+' 집결까지 '+dur(st.left)}
   else if(st.phase==='meet'){tag='집결';txt='지금 모이세요 · '+esc(S.meetPlace)}
   else{tag='종료';txt='수고했어요. 안전하게 귀가하세요'}
-  return '<header class="topbar"><b>'+esc(S.school)+'</b><span class="sp"></span>'+netChip()+'</header>'+
-   '<div class="profile"><div class="ring"><img src="emblem.png" alt="금정중학교 교표" width="86" height="86"></div><div class="pmain"><h1>2026 '+esc(S.title)+'</h1>'+
-   '<ul class="stats"><li><b>'+S.program.length+'</b>순서</li><li><b class="mono">'+esc(S.start)+'</b>시작</li><li><b class="mono">'+esc(S.meetTime)+'</b>집결</li></ul></div></div>'+
-   '<div class="bio"><b>'+esc(S.school)+' 학생 축제</b><span>'+fmtDate(S.date)+' · '+esc(S.venue)+'</span></div>'+
-   '<div class="status" aria-live="polite"><span class="tag mono">'+tag+'</span><span>'+txt+'</span></div>';
-}
-/* 탭 아이콘 (선 아이콘, 파일을 따로 받지 않도록 코드에 직접) */
+  var meetPin=-1;S.pins.forEach(function(p,i){if(meetPin<0&&p.kind==='meet'&&p.x!=null)meetPin=i});
+  var place=meetPin>-1?'<button class="fact" data-gopin="'+meetPin+'"><small>집결 장소</small><b class="txt">'+esc(S.meetPlace)+'</b><em>지도에서 보기 ›</em></button>':'<div class="fact"><small>집결 장소</small><b class="txt">'+esc(S.meetPlace)+'</b></div>';
+  return '<div class="hero"><div class="ring"><img src="emblem.png" alt="금정중학교 교표" width="104" height="104"></div>'+
+   '<p class="eyebrow">'+esc(S.school)+' 학생 축제</p><h1>2026 <span>'+esc(S.title)+'</span></h1>'+
+   '<div class="pills"><span class="pill">'+fmtDate(S.date)+'</span><span class="pill">'+esc(S.venue)+'</span></div></div>'+
+   '<div class="status" aria-live="polite"><span class="tag mono">'+tag+'</span><span>'+txt+'</span></div>'+
+   '<div class="facts"><div class="fact"><small>공연 시작</small><b class="mono">'+esc(S.start)+'</b></div><div class="fact"><small>집결 시각</small><b class="mono">'+esc(S.meetTime)+'</b></div>'+
+   '<div class="fact"><small>공연장</small><b class="txt">'+esc(S.venue)+'</b></div>'+place+'</div>';
+}/* 탭 아이콘 (선 아이콘, 파일을 따로 받지 않도록 코드에 직접) */
 var ICON={schedule:'<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/>',
   safety:'<path d="M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6Z"/><path d="m9 12 2 2 4-4"/>',
   map:'<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z"/><path d="M9 4v14M15 6v14"/>',
@@ -450,8 +474,10 @@ function renderInner(){
   if(tab!=='map')mapFull=false;
   if(tab==='schedule')v=vSchedule(st);else if(tab==='safety')v=vSafety();else if(tab==='map')v=vMap();else if(tab==='free')v=vFree(st);else v=vHelp();
   var upd=updatedAt?(function(){var d=new Date(updatedAt);return isNaN(d)?'':' · '+(d.getMonth()+1)+'/'+d.getDate()+' '+hm(d.getHours()*60+d.getMinutes())+' 수정본'})():'';
-  /* 프로필(교표·숫자·상태)은 첫 탭에만, 다른 탭은 위 줄만 보여서 본문이 넓어요 */
-  var hd=header(st);if(tab!=='schedule')hd=hd.slice(0,hd.indexOf('</header>')+9);
+  /* 메인 소개(교표·상태·정보 4칸)는 식순 탭에만, 다른 탭은 위 줄만 보여서 본문이 넓어요 */
+  var bar=(annActive()&&ann.id===annClosed)?'<button class="annbar" data-act="annopen"><span aria-hidden="true">📢</span><span>'+esc(ann.text)+'</span></button>':'';
+  annBarOn=!!bar;
+  var hd=header()+bar+(tab==='schedule'?hero(st):'');
   app.innerHTML='<div class="wrap">'+hd+
    '<section class="view">'+v+'</section>'+
    '<div class="toolbar"><span>현재 시각 <span class="mono">'+hm(nowMin())+'</span> 기준'+upd+'</span><button class="btn small" data-act="login">선생님 수정</button></div>'+
@@ -495,7 +521,7 @@ function renderLogin(){
   var pw=document.getElementById('pw');if(pw)pw.focus();
 }
 function api(body){return fetch(SAVE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().catch(function(){return{ok:false,error:'http_'+r.status}})})}
-function errText(e){return{wrong_password:'비밀번호가 맞지 않아요.',not_configured:'버셀 환경 변수(ADMIN_PASSWORD, GITHUB_TOKEN, GITHUB_REPO)가 아직 설정되지 않았어요.',too_large:'내용이 너무 길어 저장하지 못했어요.',conflict:'다른 선생님이 동시에 저장했어요. 잠시 뒤 다시 저장해 주세요.',bad_data:'저장할 내용에 빠진 항목이 있어요.',http_404:'저장 기능은 버셀에 배포한 사이트에서만 쓸 수 있어요.'}[e]||('저장하지 못했어요('+e+'). 잠시 뒤 다시 시도해 주세요.')}
+function errText(e){return{wrong_password:'비밀번호가 맞지 않아요.',not_configured:'버셀 환경 변수(ADMIN_PASSWORD, GITHUB_TOKEN, GITHUB_REPO)가 아직 설정되지 않았어요.',too_large:'내용이 너무 길어 저장하지 못했어요.',conflict:'다른 선생님이 동시에 저장했어요. 잠시 뒤 다시 저장해 주세요.',bad_data:'저장할 내용에 빠진 항목이 있어요.',bad_text:'공지 내용은 1~200자로 적어 주세요.',network:'인터넷 연결을 확인하고 다시 시도해 주세요.',http_404:'저장 기능은 버셀에 배포한 사이트에서만 쓸 수 있어요.'}[e]||('저장하지 못했어요('+e+'). 잠시 뒤 다시 시도해 주세요.')}
 
 /* ---------- editor ---------- */
 function renderEditor(){
@@ -516,16 +542,45 @@ function renderEditor(){
   function f(id,label,val,type){return'<div class="field"><label for="'+id+'">'+label+'</label><input id="'+id+'" type="'+(type||'text')+'" data-s="'+id.slice(2)+'" value="'+esc(val)+'"></div>'}
   function ta(key,label){return'<div class="field"><label for="t-'+key+'">'+label+' (한 줄에 하나씩)</label><textarea id="t-'+key+'" data-l="'+key+'">'+esc((d[key]||[]).join('\n'))+'</textarea></div>'}
   app.innerHTML='<div class="wrap plain"><div class="editor">'+
-   '<div class="sec-h"><h2>식순·안내 수정</h2><p>저장하면 사이트가 새로 배포되고(약 1분), 학생 화면에는 그 뒤 3분 안에 반영돼요.</p></div>'+
+   '<div class="sec-h"><h2>식순·안내 수정</h2><p>맨 위 공지는 바로 보내져요. 아래 내용은 저장하면 사이트가 새로 배포되고(약 1분), 학생 화면에는 그 뒤 3분 안에 반영돼요.</p></div>'+
+   annCard()+
    '<div class="card"><h3>기본 정보</h3><div class="grid2">'+f('s-date','행사 날짜',d.date,'date')+f('s-venue','장소',d.venue)+f('s-start','공연 시작',d.start,'time')+f('s-meetTime','집결 시각',d.meetTime,'time')+f('s-meetPlace','집결 장소',d.meetPlace)+f('s-homeNote','귀가 방법',d.homeNote)+'</div></div>'+
+   '<div class="card"><h3>비상 연락처</h3><div class="erows">'+crow+'</div><button class="btn" data-act="cadd">연락처 추가</button></div>'+
+   '<div class="card"><h3>지도 위치 표시</h3><p class="callout">"지도에서 위치 찍기"를 누른 뒤 아래 지도에서 그 장소를 누르면 번호가 표시돼요.</p><div class="erows">'+prow+'</div><button class="btn" data-act="madd">위치 추가</button>'+mapBlock(d.pins,{placing:placing>-1})+'</div>'+
    '<div class="card"><h3>식순 <span class="mono" style="font-weight:400;color:var(--muted);font-size:14px">'+d.program.length+'개</span></h3><div class="erows">'+rows+'</div><button class="btn" data-ins="'+d.program.length+'">순서 추가</button>'+
    '<datalist id="types"><option value="개회식"><option value="공식행사"><option value="개인공연"><option value="동아리공연"><option value="특별공연"><option value="특별영상"><option value="밴드공연"><option value="폐회식"></datalist></div>'+
-   '<div class="card"><h3>지도 위치 표시</h3><p class="callout">"지도에서 위치 찍기"를 누른 뒤 아래 지도에서 그 장소를 누르면 번호가 표시돼요.</p><div class="erows">'+prow+'</div><button class="btn" data-act="madd">위치 추가</button>'+mapBlock(d.pins,{placing:placing>-1})+'</div>'+
    '<div class="card"><h3>안전·자유시간 안내</h3>'+ta('watchRules','관람 수칙')+ta('evacSteps','비상 대피 순서')+ta('freeRules','자유시간 약속')+ta('homeChecks','귀가 전 체크 항목')+'</div>'+
-   '<div class="card"><h3>비상 연락처</h3><div class="erows">'+crow+'</div><button class="btn" data-act="cadd">연락처 추가</button></div>'+
    '<div class="savebar"><span class="msg" id="savemsg">'+(busy?'저장 중…':'바꾼 내용은 저장을 눌러야 반영돼요.')+'</span><button class="btn" data-act="cancel">취소</button><button class="btn primary" data-act="save"'+(busy?' disabled':'')+'>저장</button></div>'+
    '</div></div>';
   wireMap();
+}
+/* 공지 보내기 (관리자). 저장 버튼과 별개로 바로 전송 */
+var ANN_PRESETS=['이제 공연을 시작합니다. 무대에 집중해 주세요.','잠시 후 다음 순서가 시작돼요. 자리로 돌아와 주세요.','공연이 끝났어요. 선생님 안내에 따라 천천히 퇴장해요.','16:00까지 집결 장소로 모여 주세요.'];
+var annDraft={text:'',minutes:10},annMsg='',annBusy=false;
+function annCard(){
+  var cur=annActive()?'<p class="callout">지금 떠 있는 공지: <b>'+esc(ann.text)+'</b> ('+Math.max(1,Math.ceil((new Date(ann.until)-Date.now())/60000))+'분 남음)</p>':'';
+  var pre=ANN_PRESETS.map(function(t,i){return'<button class="btn small" data-annpre="'+i+'">'+esc(t)+'</button>'}).join('');
+  var mins=[5,10,30].map(function(n){return'<button class="chipbtn" data-annmin="'+n+'" aria-pressed="'+(annDraft.minutes===n)+'">'+n+'분</button>'}).join('');
+  return'<div class="card"><h3>학생 화면에 공지 띄우기</h3><p class="callout">보내면 학생 화면에 큰 글씨로 떠요. 학생이 화면을 누르면 닫혀요. 아래 "저장"과 상관없이 바로 보내지고, 학생 화면에는 1~2분 안에 떠요.</p>'+cur+
+   '<div class="field"><label for="ann-text">공지 내용 (200자까지)</label><textarea id="ann-text" data-ann="1" maxlength="200" style="min-height:90px">'+esc(annDraft.text)+'</textarea></div>'+
+   '<div class="field"><label>자주 쓰는 문구 (누르면 채워져요)</label><div class="presets">'+pre+'</div></div>'+
+   '<div class="field"><label>띄워 둘 시간</label><div class="filters" role="group" aria-label="띄워 둘 시간">'+mins+'</div></div>'+
+   '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="annsend"'+(annBusy?' disabled':'')+'>공지 보내기</button>'+(annActive()?'<button class="btn" data-act="annoff"'+(annBusy?' disabled':'')+'>공지 내리기</button>':'')+'</div>'+
+   (annMsg?'<p class="callout" role="status">'+esc(annMsg)+'</p>':'')+'</div>';
+}
+function annDone(r,okMsg){annBusy=false;annMsg=r.ok?okMsg:errText(r.error);if(mode==='edit')render()}
+function sendAnn(){
+  var t=annDraft.text.trim();if(annBusy)return;
+  if(!t){annMsg='공지 내용을 적어 주세요.';render();return}
+  annBusy=true;annMsg='보내는 중…';render();
+  api({action:'announce',password:adminPw,text:t,minutes:annDraft.minutes}).then(function(r){
+    if(r.ok&&r.announce&&r.announce.text){ann=r.announce;annClosed=ann.id;try{localStorage.setItem(LSANN,annClosed)}catch(e){}} // 보낸 선생님 화면에는 큰 공지를 다시 띄우지 않음
+    annDone(r,'보냈어요. 1~2분 안에 학생 화면에 떠요.');
+  }).catch(function(){annDone({ok:false,error:'network'},'')});
+}
+function offAnn(){
+  if(annBusy)return;annBusy=true;annMsg='내리는 중…';render();
+  api({action:'unannounce',password:adminPw}).then(function(r){if(r.ok)ann=null;annDone(r,'내렸어요. 1~2분 안에 학생 화면에서 사라져요.')}).catch(function(){annDone({ok:false,error:'network'},'')});
 }
 function setMsg(t){var e=document.getElementById('savemsg');if(e)e.textContent=t}
 function toast(t){var e=document.createElement('div');e.className='toast';e.setAttribute('role','status');e.textContent=t;document.body.appendChild(e);setTimeout(function(){e.remove()},3800)}
@@ -545,6 +600,37 @@ function save(){
     try{localStorage.setItem(CACHE,JSON.stringify({data:S,updated:updatedAt}))}catch(e){}
     mode='view';draft=null;placing=-1;mapFull=false;render();toast('저장했어요. 약 1~4분 뒤 모든 학생 화면에 반영돼요.');
   }).catch(function(){busy=false;setMsg('인터넷 연결을 확인하고 다시 저장해 주세요.')});
+}
+
+/* ---------- 공지: announce.json(작은 파일)을 1분마다 확인 ---------- */
+var ann=null,annClosed='',annBarOn=false,annLoading=false,LSANN='hanumul2026-ann-closed';
+try{annClosed=localStorage.getItem(LSANN)||''}catch(e){}
+function annActive(){return !!(ann&&ann.text&&Date.now()<new Date(ann.until).getTime())}
+function annTime(){var d=new Date(ann.at);return isNaN(d)?'':hm(d.getHours()*60+d.getMinutes())+' 선생님 공지'}
+function hideAnn(){var o=document.getElementById('annov');if(o)o.remove()}
+function showAnn(buzz){
+  hideAnn();if(!annActive())return;
+  var o=document.createElement('div');o.className='ann';o.id='annov';o.dataset.id=ann.id;o.tabIndex=-1;o.setAttribute('role','alertdialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','선생님 공지');
+  o.innerHTML='<div class="ann-card"><span class="tag">📢 공지</span><p class="ann-text">'+esc(ann.text)+'</p><span class="ann-time">'+esc(annTime())+'</span><span class="ann-hint">화면을 누르면 닫혀요</span></div>';
+  o.addEventListener('click',function(){annClosed=ann?ann.id:'';try{localStorage.setItem(LSANN,annClosed)}catch(e){}hideAnn();if(mode==='view')render()});
+  document.body.appendChild(o);o.focus();
+  if(buzz){try{if(navigator.vibrate&&(!navigator.userActivation||navigator.userActivation.hasBeenActive))navigator.vibrate([200,100,200])}catch(e){}} // 화면을 한 번이라도 눌렀을 때만 진동 (그 전에는 브라우저가 막음)
+}
+function applyAnn(){
+  var ov=document.getElementById('annov');
+  if(!annActive()){hideAnn();if(mode==='view'&&annBarOn)render();return}
+  if(mode!=='view')return;
+  if(ann.id!==annClosed){if(!ov||ov.dataset.id!==ann.id)showAnn(true);if(annBarOn)render()}
+  else{if(ov)hideAnn();if(!annBarOn)render()}
+}
+function loadAnn(){
+  if(annLoading)return;annLoading=true;
+  var ctl=window.AbortController?new AbortController():null,timer=setTimeout(function(){if(ctl)ctl.abort()},8000);
+  fetch('announce.json',{cache:'no-cache',signal:ctl?ctl.signal:undefined}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(j){
+    clearTimeout(timer);annLoading=false;
+    ann=(j&&typeof j==='object'&&typeof j.text==='string'&&j.text.trim())?{id:String(j.id||''),text:j.text.trim().slice(0,200),at:String(j.at||''),until:String(j.until||'')}:null;
+    applyAnn();
+  }).catch(function(){clearTimeout(timer);annLoading=false}); // 실패하면 조용히 넘어가고 다음 확인 때 다시
 }
 
 /* ---------- data sync ---------- */
@@ -579,6 +665,11 @@ app.addEventListener('click',function(ev){
   if(b.dataset.copy!=null){var t=b.dataset.copy,ok=function(){b.textContent='복사됨';setTimeout(function(){b.textContent='복사'},1500)};
     if(navigator.clipboard)navigator.clipboard.writeText(t).then(ok,function(){});return}
   var a=b.dataset.act;
+  if(a==='annopen'){showAnn(false);return}
+  if(a==='annsend'){sendAnn();return}
+  if(a==='annoff'){offAnn();return}
+  if(b.dataset.annpre!=null){annDraft.text=ANN_PRESETS[+b.dataset.annpre];render();return}
+  if(b.dataset.annmin!=null){annDraft.minutes=+b.dataset.annmin;render();return}
   if(a==='mapretry'){mapOk=null;zoom=null;render();return}
   if(a==='mapfull'){mapFull=!mapFull;zoom=null;var yf=window.scrollY;render();if(!mapFull)window.scrollTo(0,yf);return}
   if(a==='login'||a==='cancel')mapFull=false;
@@ -605,7 +696,8 @@ app.addEventListener('submit',function(ev){
 });
 app.addEventListener('input',function(ev){
   var e=ev.target;if(!draft)return;
-  if(e.dataset.p!=null){var p=draft.program[+e.dataset.p];p[e.dataset.k]=e.value}
+  if(e.dataset.ann!=null)annDraft.text=e.value;
+  else if(e.dataset.p!=null){var p=draft.program[+e.dataset.p];p[e.dataset.k]=e.value}
   else if(e.dataset.c!=null)draft.contacts[+e.dataset.c][e.dataset.k]=e.value;
   else if(e.dataset.m!=null)draft.pins[+e.dataset.m][e.dataset.k]=e.value;
   else if(e.dataset.s){draft[e.dataset.s]=e.value}
@@ -618,11 +710,14 @@ app.addEventListener('change',function(ev){var e=ev.target;
 render();
 /* 350명이 같은 순간에 요청하지 않도록 첫 확인과 주기 확인을 사람마다 조금씩 어긋나게 */
 setTimeout(load,Math.random()*1500);
-setInterval(function(){if(mode==='view'&&tab!=='map'&&!document.hidden)render()},30000);
+setTimeout(loadAnn,300+Math.random()*1500);
+setInterval(function(){if(mode==='view'&&tab!=='map'&&!document.hidden)render();applyAnn()},30000);
+/* 공지는 아주 작은 파일이라 1분(±25%)마다 확인. 화면이 꺼져 있으면 건너뜀 */
+(function pollA(){setTimeout(function(){if(!document.hidden)loadAnn();pollA()},ANN_MS*(0.75+Math.random()*0.5))})();
 (function poll(){setTimeout(function(){if(!document.hidden)load();poll()},POLL_MS*(0.75+Math.random()*0.5))})();
 var lastVis=0;
-document.addEventListener('visibilitychange',function(){if(!document.hidden&&Date.now()-lastVis>30000){lastVis=Date.now();load()}});
-window.addEventListener('online',function(){load()});
+document.addEventListener('visibilitychange',function(){if(!document.hidden){loadAnn();if(Date.now()-lastVis>30000){lastVis=Date.now();load()}}});
+window.addEventListener('online',function(){load();loadAnn()});
 window.addEventListener('offline',function(){online=false;if(mode==='view'&&tab!=='map')render()});
 /* 오프라인 저장: 한 번 열면 다음부터는 통신이 안 돼도 열려요 */
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
