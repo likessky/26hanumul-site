@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>2026 한우물제</title>
+<meta name="description" content="금정중학교 한우물제 공연 식순, 관람 안전, 서울랜드 지도, 집결·귀가 안내">
+<meta property="og:title" content="2026 한우물제 · 금정중학교">
+<meta property="og:description" content="10월 28일 서울랜드 이벤트홀 · 식순과 안전·집결 안내">
+<meta property="og:image" content="emblem.png">
+<meta name="theme-color" content="#1B1F3B">
+<link rel="icon" href="emblem.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<!-- 제목용 글꼴도 우리 사이트에서 직접 제공 (외부 서버에 의존하지 않음) -->
+<link rel="stylesheet" href="fonts/black-han-sans.css">
+<style>
+/* Layout: 무대 티켓 모양 헤더(교표) + 고정 탭 + 한 열 본문(최대 760px). 시각은 고정폭 숫자, 공연 종류는 색 칩 */
+:root{
+  --bg:#F2F3F8; --surface:#FFFFFF; --ink:#191C33; --muted:#5B6080; --line:#DCDFEA;
+  --stage:#1B1F3B; --stage-fg:#F6F3EA; --stage-muted:#B9BCD6;
+  --accent:#D88A00; --accent-soft:#FFF0CF; --accent-ink:#2A1C00;
+  --c-cer:#4656A8; --c-perf:#B4500C; --c-video:#0C7887;
+  --danger:#C12A2A; --danger-soft:#FDE8E8; --ok:#2C7A4C;
+  --f-display:"Black Han Sans","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  --f-body:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  --f-mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+  color-scheme:light;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1022; --surface:#171A31; --ink:#ECEDF6; --muted:#A2A7C4; --line:#2B2F4E;
+  --stage:#22264A; --accent:#F2B33D; --accent-soft:#3A2D10;
+  --c-cer:#909DEB; --c-perf:#F2914F; --c-video:#52C6D4;
+  --danger:#FF7676; --danger-soft:#3A1717; --ok:#62CF8F; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1022; --surface:#171A31; --ink:#ECEDF6; --muted:#A2A7C4; --line:#2B2F4E;
+  --stage:#22264A; --accent:#F2B33D; --accent-soft:#3A2D10;
+  --c-cer:#909DEB; --c-perf:#F2914F; --c-video:#52C6D4;
+  --danger:#FF7676; --danger-soft:#3A1717; --ok:#62CF8F; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
+img{max-width:100%}
+[hidden]{display:none!important}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:16px 48px;display:grid;gap:20px}
+h1,h2,h3{text-wrap:balance;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* ticket header */
+.ticket{display:grid;grid-template-columns:1fr auto;background:var(--stage);color:var(--stage-fg);border-radius:14px;overflow:hidden}
+.t-main{padding:20px 22px;min-width:0;display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center}
+.emblem{width:72px;height:72px;border-radius:50%;background:#fff;padding:5px;display:block;grid-row:span 3}
+.t-text{min-width:0;display:grid;gap:2px;grid-row:span 3}
+.eyebrow{margin:0;font-size:12px;letter-spacing:.12em;color:var(--stage-muted)}
+.ticket h1{font-family:var(--f-display);font-weight:400;font-size:clamp(32px,7.5vw,50px);line-height:1.05;color:var(--stage-fg)}
+.ticket h1 span{color:var(--accent)}
+.meta{margin:0;color:var(--stage-muted);font-size:14px}
+.t-stub{border-left:2px dashed rgba(246,243,234,.3);padding:20px 22px;min-width:150px;max-width:230px;display:grid;align-content:center;gap:2px;position:relative}
+.t-stub::before,.t-stub::after{content:"";position:absolute;left:-11px;width:20px;height:20px;border-radius:50%;background:var(--bg)}
+.t-stub::before{top:-10px}.t-stub::after{bottom:-10px}
+.st-label{font-size:12px;letter-spacing:.1em;color:var(--accent);font-weight:700}
+.st-big{font-family:var(--f-display);font-size:30px;line-height:1.15}
+.st-small{font-size:13px;color:var(--stage-muted)}
+@media (max-width:560px){.ticket{grid-template-columns:1fr}.t-stub{border-left:0;border-top:2px dashed rgba(246,243,234,.3);max-width:none}
+ .t-stub::before{top:-11px;left:-10px}.t-stub::after{top:-11px;bottom:auto;left:auto;right:-10px}
+ .emblem{width:56px;height:56px}}
+
+/* tabs */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:6px;padding-block:8px;overflow-x:auto;scrollbar-width:none}
+.tab{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px;font-weight:600;cursor:pointer;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.small{padding:4px 10px;font-size:13px;border-radius:8px}
+.btn:disabled{opacity:.45;cursor:default}
+.note-bar{background:var(--accent-soft);border-radius:10px;padding:10px 14px;font-size:14px}
+
+section.view{display:grid;gap:18px}
+.sec-h{display:grid;gap:2px}
+.sec-h h2{font-size:21px}
+.sec-h p{margin:0;color:var(--muted);font-size:14px}
+
+.now{background:var(--surface);border:2px solid var(--accent);border-radius:14px;padding:16px 18px;display:grid;gap:8px}
+.now .k{font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--accent)}
+.now h3{font-size:20px}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.now .sub{font-size:14px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 14px}
+.prep{font-size:13px;background:var(--bg);border-radius:8px;padding:8px 10px}
+
+.summary{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted)}
+.summary b{color:var(--ink)}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.chipbtn{border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 12px;font-size:13px;cursor:pointer;color:var(--muted)}
+.chipbtn[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:700}
+
+.prog{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.row{display:grid;grid-template-columns:30px 1fr;gap:4px 12px;padding:13px 16px;border-top:1px solid var(--line);align-items:start}
+.row:first-child{border-top:0}
+.row .no{font-family:var(--f-mono);color:var(--muted);font-size:13px;padding-top:2px}
+.row .tm{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:14px;font-weight:500;line-height:1.35}
+.row .tm small{display:block;color:var(--muted);font-size:12px}
+.row .body{min-width:0;display:grid;gap:3px}
+.row .title{font-weight:600}
+.row .stage{font-size:13px;color:var(--muted)}
+.chip{display:inline-block;font-size:12px;font-weight:700;border-radius:6px;padding:1px 7px;margin-right:6px;border:1px solid currentColor;vertical-align:1px}
+.chip.cer{color:var(--c-cer)}.chip.perf{color:var(--c-perf)}.chip.video{color:var(--c-video)}
+.row.past{opacity:.5}
+.row.cur{background:var(--accent-soft)}
+.row.cur .no{color:var(--accent);font-weight:700}
+
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:grid;gap:10px}
+.card h3{font-size:17px}
+.rules{margin:0;padding-left:20px;display:grid;gap:6px}
+.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;gap:10px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start}
+.steps li::before{content:counter(s);font-family:var(--f-mono);font-weight:600;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--danger-soft);color:var(--danger);font-size:14px}
+.evac{border-color:var(--danger)}
+.evac h3{color:var(--danger)}
+.callout{font-size:14px;background:var(--bg);border-radius:8px;padding:8px 12px;margin:0}
+
+.meet{background:var(--stage);color:var(--stage-fg);border-radius:14px;padding:18px 20px;display:grid;grid-template-columns:auto 1fr auto;gap:6px 20px;align-items:center}
+.meet .clock{font-family:var(--f-display);font-size:48px;line-height:1;color:var(--accent)}
+.meet .info{min-width:0;display:grid;gap:2px}
+.meet .info b{font-size:17px}
+.meet .info span{color:var(--stage-muted);font-size:14px}
+.meet .btn{background:transparent;color:var(--stage-fg);border-color:rgba(246,243,234,.4)}
+@media (max-width:480px){.meet{grid-template-columns:1fr}}
+
+.tl{list-style:none;margin:0;padding:0;display:grid}
+.tl li{display:grid;grid-template-columns:62px 14px 1fr;gap:10px;align-items:start;padding-bottom:14px;position:relative}
+.tl li:last-child{padding-bottom:0}
+.tl .t{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:14px;text-align:right;padding-top:1px}
+.tl .dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--accent);background:var(--surface);margin-top:5px;position:relative;z-index:1}
+.tl li:not(:last-child)::after{content:"";position:absolute;left:77px;top:18px;bottom:0;width:2px;background:var(--line)}
+.tl li.done .dot{background:var(--accent)}
+.tl li.on .dot{background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.tl .d{min-width:0}.tl .d small{display:block;color:var(--muted);font-size:13px}
+
+.check{display:grid;gap:8px}
+.check label{display:flex;gap:10px;align-items:center;cursor:pointer}
+.check input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+
+.sit{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.sit .card{gap:6px}
+.sit p{margin:0;font-size:14px}
+.contacts{display:grid;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.ct{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 16px;border-top:1px solid var(--line);align-items:center}
+.ct:first-child{border-top:0}
+.ct .who{min-width:0}.ct .who small{display:block;color:var(--muted);font-size:13px}
+.ct .num{font-family:var(--f-mono);font-size:15px;user-select:all}
+.ct .empty{color:var(--muted);font-size:13px}
+.ct.urgent .num{color:var(--danger);font-weight:600;font-size:18px}
+
+/* map */
+.mapbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.mapbar .sp{flex:1}
+.mapbox{overflow:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface);max-height:72vh;-webkit-overflow-scrolling:touch}
+.mapinner{position:relative;width:calc(100% * var(--z,1))}
+.mapinner img{display:block;width:100%;max-width:none;height:auto;user-select:none;-webkit-user-drag:none}
+.mapinner.placing{cursor:crosshair}
+.pin{position:absolute;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;font:600 14px/1 var(--f-mono);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.35);cursor:pointer;padding:0}
+.pin.sel{width:38px;height:38px;font-size:16px;z-index:2}
+.pin .lbl{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--ink);color:var(--bg);font:600 13px/1.3 var(--f-body);padding:4px 8px;border-radius:6px}
+.k-stage{background:var(--c-perf)}.k-meet{background:var(--accent)}.k-aid{background:var(--danger)}.k-info{background:var(--c-video)}.k-teacher{background:var(--c-cer)}.k-etc{background:var(--muted)}
+.legend{list-style:none;margin:0;padding:0;display:grid;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.legend li{border-top:1px solid var(--line)}
+.legend li:first-child{border-top:0}
+.legend button{all:unset;box-sizing:border-box;width:100%;display:grid;grid-template-columns:30px 1fr auto;gap:12px;align-items:center;padding:10px 16px;cursor:pointer}
+.legend button:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.legend .pin{position:static;transform:none;width:26px;height:26px;font-size:13px;box-shadow:none;border-width:2px}
+.legend small{color:var(--muted);font-size:13px}
+.mapempty{padding:28px 20px;display:grid;gap:8px;text-align:center;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;padding:8px 14px;font-weight:600;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.official{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);position:relative}
+.official iframe{display:block;width:100%;height:78vh;min-height:480px;border:0;position:relative;z-index:1;background:transparent}
+.official .behind{position:absolute;inset:0;display:grid;place-content:center;gap:8px;text-align:center;color:var(--muted);padding:20px}
+.netchip{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.netchip i{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.netchip.off i{background:var(--danger)}
+
+/* editor & login */
+.editor{display:grid;gap:18px}
+.field{display:grid;gap:4px;min-width:0}
+.field label{font-size:13px;font-weight:600;color:var(--muted)}
+.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;min-width:0}
+.field textarea{min-height:150px;line-height:1.5;resize:vertical}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.erows{display:grid;gap:10px}
+.erow{border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;grid-template-columns:110px 1fr 70px;gap:8px;background:var(--bg)}
+.erow .full{grid-column:1/-1}
+.erow .ops{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--muted)}
+.erow .ops .sp{flex:1}
+.eprog{grid-template-columns:130px 1fr}
+.ecr{grid-template-columns:1fr 1fr 1fr auto}
+.epin{grid-template-columns:1fr 130px}
+@media (max-width:520px){.erow,.eprog{grid-template-columns:1fr}.ecr,.epin{grid-template-columns:1fr 1fr}}
+.savebar{position:sticky;bottom:0;background:var(--bg);padding-block:12px calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--line)}
+.savebar .msg{flex:1 1 200px;font-size:14px;color:var(--muted)}
+.login{max-width:420px;width:100%;margin:0 auto}
+.login form{display:grid;gap:12px}
+.err{color:var(--danger);font-size:14px;margin:0}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;max-width:calc(100% - 32px);z-index:20}
+footer{color:var(--muted);font-size:13px;text-align:center}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .6s ease}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<!-- 기본 데이터: data.json을 아직 못 받았을 때(첫 접속 직후, 통신 불량) 이 내용이 바로 보여요 -->
+<script id="state" type="application/json">{
+ "school": "금정중학교",
+ "title": "한우물제",
+ "date": "2026-10-28",
+ "venue": "서울랜드 이벤트홀",
+ "start": "09:30",
+ "meetTime": "16:00",
+ "meetPlace": "서울랜드 정문 앞 (확정되면 수정)",
+ "homeNote": "반별 인원 확인이 끝나면 담임 선생님 안내에 따라 귀가",
+ "mapLink": "https://seoulland.co.kr/?p=13&type=attraction&key=&idx=59",
+ "program": [
+  {
+   "type": "개회식",
+   "title": "안전 및 학교폭력예방교육 영상 시청 (비상 대피요령 포함)"
+  },
+  {
+   "type": "공식행사",
+   "title": "교장선생님 개회사 및 내빈 소개, 학교운영위원장님 축사"
+  },
+  {
+   "type": "개인공연",
+   "title": "유한휘 - '잠깐 시간될까' (보컬)"
+  },
+  {
+   "type": "개인공연",
+   "title": "문성연 - '사랑의 바보' (보컬)"
+  },
+  {
+   "type": "개인공연",
+   "title": "이태성 - '헤이리 처녀' (보컬)"
+  },
+  {
+   "type": "특별영상",
+   "title": "1학년 릴스대회 영상 시청"
+  },
+  {
+   "type": "동아리공연",
+   "title": "포텐(9명) - '믹스' (댄스)"
+  },
+  {
+   "type": "특별공연",
+   "title": "쇼메이커스 마술 공연"
+  },
+  {
+   "type": "특별영상",
+   "title": "2학년 릴스대회 영상 시청"
+  },
+  {
+   "type": "개인공연",
+   "title": "유지한 - '모든날 모든순간' (보컬)"
+  },
+  {
+   "type": "개인공연",
+   "title": "박유찬 - '정류장' (보컬)"
+  },
+  {
+   "type": "동아리공연",
+   "title": "딜라이트(6명) - '믹스' (댄스)"
+  },
+  {
+   "type": "특별공연",
+   "title": "3학년 남학생(18명) - '수중발레' 퍼포먼스"
+  },
+  {
+   "type": "특별영상",
+   "title": "3학년 릴스대회 영상 시청"
+  },
+  {
+   "type": "밴드공연",
+   "title": "라온밴드(8명) - 피날레 밴드 라이브 공연"
+  }
+ ],
+ "pins": [
+  {
+   "label": "이벤트홀 (한우물제 공연장)",
+   "kind": "stage",
+   "x": null,
+   "y": null
+  },
+  {
+   "label": "16:00 집결 장소",
+   "kind": "meet",
+   "x": null,
+   "y": null
+  },
+  {
+   "label": "의무실",
+   "kind": "aid",
+   "x": null,
+   "y": null
+  },
+  {
+   "label": "안내소",
+   "kind": "info",
+   "x": null,
+   "y": null
+  },
+  {
+   "label": "선생님 대기 위치",
+   "kind": "teacher",
+   "x": null,
+   "y": null
+  }
+ ],
+ "watchRules": [
+  "우리 반 지정 좌석에 앉고, 공연 중에는 자리를 옮기지 않아요.",
+  "통로와 비상구 앞에는 가방이나 물건을 두지 않아요.",
+  "무대 위로 올라가거나 무대 앞으로 몰려 나가지 않아요.",
+  "화장실은 담임 선생님께 말하고, 공연이 바뀌는 사이에 다녀와요.",
+  "휴대폰은 무음으로 하고, 촬영은 자리에서 플래시 없이 해요.",
+  "친구 얼굴이 나온 사진·영상은 허락 없이 SNS에 올리지 않아요.",
+  "야유, 물건 던지기, 레이저 포인터 사용은 금지예요. 박수와 환호로 응원해요.",
+  "몸이 안 좋으면 손을 들어 가까운 선생님께 바로 알려요."
+ ],
+ "evacSteps": [
+  "비상 방송이나 선생님 지시가 나오면 그 자리에서 멈추고 조용히 들어요.",
+  "짐은 두고, 뛰지 말고, 앞사람을 밀지 않으며 가장 가까운 비상구로 나가요.",
+  "연기가 나면 손수건이나 옷소매로 코와 입을 막고 자세를 낮춰 이동해요.",
+  "건물 밖 안전한 곳에서 반별로 모여요.",
+  "담임 선생님께 인원 확인을 받기 전에는 흩어지지 않아요."
+ ],
+ "freeRules": [
+  "3명 이상 조를 만들어 함께 다니고, 혼자 다니지 않아요.",
+  "서울랜드 밖으로 나가지 않아요.",
+  "놀이기구 탑승 기준(키·나이·건강)과 직원 안내를 꼭 지켜요.",
+  "새치기나 다툼 없이 다른 손님을 배려해요.",
+  "휴대폰 배터리를 남겨 두고, 선생님 전화를 바로 받을 수 있게 해요.",
+  "다치거나 아프면 바로 선생님께 연락하고, 가까운 직원에게 도움을 요청해요.",
+  "돈과 소지품은 직접 챙기고, 잃어버리면 안내소와 선생님께 알려요.",
+  "쓰레기는 쓰레기통에 버려요."
+ ],
+ "homeChecks": [
+  "내 소지품(가방, 휴대폰, 지갑)을 모두 챙겼어요",
+  "우리 조 친구들이 모두 함께 있어요",
+  "16:00까지 집결 장소에 도착했어요",
+  "담임 선생님께 출석 확인을 받았어요",
+  "보호자께 귀가 출발 연락을 드렸어요"
+ ],
+ "contacts": [
+  {
+   "role": "총괄 인솔",
+   "name": "",
+   "phone": ""
+  },
+  {
+   "role": "1학년 인솔",
+   "name": "",
+   "phone": ""
+  },
+  {
+   "role": "2학년 인솔",
+   "name": "",
+   "phone": ""
+  },
+  {
+   "role": "3학년 인솔",
+   "name": "",
+   "phone": ""
+  },
+  {
+   "role": "보건 담당",
+   "name": "",
+   "phone": ""
+  }
+ ]
+}</script>
+
+<script>
+/* =========================================================
+   학생 화면은 같은 사이트의 data.json(정적 파일)만 읽어요.
+   저장(api/save)은 선생님이 수정할 때만 호출돼요.
+   ========================================================= */
+var DATA_URL = 'data.json';
+var SAVE_URL = 'api/save';
+var MAP_IMAGE = 'map.jpg';   // 서울랜드 가이드맵 캡처 이미지 (없으면 공식 지도만 보여요)
+var POLL_MS = 3 * 60 * 1000; // 새 내용 확인 간격(3분, 사람마다 조금씩 어긋나게)
+
+(function(){
+var DEFAULT=JSON.parse(document.getElementById('state').textContent);
+var CACHE='hanumul2026-data', LSCHK='hanumul2026-check';
+var S=DEFAULT, updatedAt='';
+try{var c=JSON.parse(localStorage.getItem(CACHE)||'null');if(c&&valid(c.data)){S=merge(c.data);updatedAt=c.updated||''}}catch(e){}
+var mode='view', draft=null, filter='all', adminPw='', zoom=1, selPin=-1, placing=-1, loginErr='', busy=false;
+var mapOk=null, mapView=null, online=navigator.onLine!==false, lastSync=0;
+var TABS=[['schedule','식순'],['safety','관람 안전'],['map','지도'],['free','자유시간·귀가'],['help','비상 연락']];
+var KINDS=[['stage','공연장'],['meet','집결'],['aid','의무실'],['info','안내소'],['teacher','선생님'],['etc','기타']];
+var tab='schedule';
+try{var h=(location.hash||'').slice(1);if(TABS.some(function(t){return t[0]===h}))tab=h}catch(e){}
+var checks={};try{checks=JSON.parse(localStorage.getItem(LSCHK)||'{}')||{}}catch(e){}
+var app=document.getElementById('app');
+
+function valid(d){return !!(d&&typeof d==='object'&&Array.isArray(d.program)&&typeof d.start==='string'&&/^\d{1,2}:\d{2}$/.test(d.start)&&typeof d.meetTime==='string')}
+function merge(d){var o=JSON.parse(JSON.stringify(DEFAULT));for(var k in d)if(d[k]!=null)o[k]=d[k];o.program=o.program.map(function(p){return{type:p.type,title:p.title}});return o}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function m(t){var p=String(t||'0:0').split(':');return(+p[0]||0)*60+(+p[1]||0)}
+function hm(n){n=Math.round(n);return String(Math.floor(n/60)%24).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
+function dur(n){n=Math.max(0,Math.round(n));var h=Math.floor(n/60),mm=n%60;return(h?h+'시간 ':'')+(mm||!h?mm+'분':'')}
+function kind(t){t=t||'';if(t.indexOf('영상')>-1)return'video';if(t.indexOf('공연')>-1)return'perf';return'cer'}
+function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function fmtDate(s){var d=new Date(s+'T00:00:00');if(isNaN(d))return s;return d.getFullYear()+'. '+(d.getMonth()+1)+'. '+d.getDate()+'.('+'일월화수목금토'[d.getDay()]+')'}
+function nowMin(){var d=new Date();return d.getHours()*60+d.getMinutes()+d.getSeconds()/60}
+
+/* 공연 진행은 늦어질 수 있어 순서별 시각은 쓰지 않고, 고정된 시작·집결 시각만 기준으로 삼아요 */
+function status(){
+  var td=ymd(new Date()),meet=m(S.meetTime);
+  if(td<S.date){var days=Math.round((new Date(S.date+'T00:00:00')-new Date(td+'T00:00:00'))/864e5);return{phase:'before',days:days}}
+  if(td>S.date)return{phase:'after'};
+  var n=nowMin();
+  if(n<m(S.start))return{phase:'pre',left:m(S.start)-n,n:n};
+  if(n<meet)return{phase:'day',left:meet-n,n:n};
+  if(n<meet+40)return{phase:'meet',n:n};
+  return{phase:'home',n:n};
+}
+
+function header(st){
+  var stub;
+  if(st.phase==='before')stub='<span class="st-label">행사까지</span><span class="st-big mono">D-'+st.days+'</span><span class="st-small">'+esc(S.start)+' 시작 · '+esc(S.meetTime)+' 집결</span>';
+  else if(st.phase==='pre')stub='<span class="st-label">오늘 행사</span><span class="st-big">곧 시작</span><span class="st-small">'+esc(S.start)+' 개회까지 '+dur(st.left)+'</span>';
+  else if(st.phase==='day')stub='<span class="st-label">오늘은 한우물제</span><span class="st-big mono">'+esc(S.meetTime)+' 집결</span><span class="st-small">집결까지 '+dur(st.left)+'</span>';
+  else if(st.phase==='meet')stub='<span class="st-label">집결 시간</span><span class="st-big">모이세요</span><span class="st-small">'+esc(S.meetPlace)+'</span>';
+  else stub='<span class="st-label">행사 종료</span><span class="st-big">수고했어요</span><span class="st-small">안전하게 귀가하세요</span>';
+  return '<header class="ticket"><div class="t-main"><img class="emblem" src="emblem.png" alt="금정중학교 교표" width="72" height="72"><div class="t-text"><p class="eyebrow">'+esc(S.school)+' 학생 축제</p><h1>2026 <span>'+esc(S.title)+'</span></h1><p class="meta">'+fmtDate(S.date)+' · '+esc(S.venue)+'</p><p class="meta mono">'+esc(S.start)+' 시작 · '+esc(S.meetTime)+' 집결</p></div></div><div class="t-stub" aria-live="polite">'+stub+'</div></header>';
+}
+
+function vSchedule(st){
+  var P=S.program,out='';
+  out+='<div class="summary"><span><b>'+P.length+'</b>개 순서</span><span class="mono">'+esc(S.start)+' 시작</span></div>';
+  var F=[['all','전체'],['perf','공연'],['video','영상'],['cer','행사']];
+  out+='<div class="filters" role="group" aria-label="종류별 보기">'+F.map(function(x){return'<button class="chipbtn" data-filter="'+x[0]+'" aria-pressed="'+(filter===x[0])+'">'+x[1]+'</button>'}).join('')+'</div><ol class="prog">';
+  P.forEach(function(p,i){
+    if(filter!=='all'&&kind(p.type)!==filter)return;
+    out+='<li class="row"><span class="no">'+(i+1)+'</span><div class="body"><span class="title"><span class="chip '+kind(p.type)+'">'+esc(p.type)+'</span>'+esc(p.title)+'</span></div></li>';
+  });
+  return'<div class="sec-h"><h2>공연 식순</h2><p>공연은 이 순서대로 진행돼요. 진행 상황에 따라 시간은 달라질 수 있어요.</p></div>'+out+'</ol>';
+}
+
+function vSafety(){
+  return'<div class="sec-h"><h2>공연 관람 안전</h2><p>이벤트홀에 들어가기 전에 한 번 읽어 주세요.</p></div>'+
+  '<div class="card"><h3>관람할 때 지켜요</h3><ul class="rules">'+S.watchRules.map(function(r){return'<li>'+esc(r)+'</li>'}).join('')+'</ul></div>'+
+  '<div class="card evac"><h3>비상 상황이 생기면</h3><ol class="steps">'+S.evacSteps.map(function(r){return'<li><span>'+esc(r)+'</span></li>'}).join('')+'</ol><p class="callout">개회식 영상에서 안내하는 비상구 위치를 자리에 앉은 뒤 직접 확인해 두세요.</p></div>';
+}
+
+/* ---------- map ---------- */
+function mapHtml(pins,opts){
+  opts=opts||{};
+  if(mapOk===false)return'<div class="mapbox"><div class="mapempty"><b>위치 표시용 지도 이미지가 아직 없어요</b><span>사이트 폴더에 '+esc(MAP_IMAGE)+' 파일을 넣으면 여기에 지도와 위치 번호가 보여요. 그동안은 "서울랜드 공식 지도"를 보세요.</span></div></div>';
+  var pinHtml=pins.map(function(p,i){if(p.x==null||p.y==null)return'';var sel=(opts.sel===i);
+    return'<button class="pin k-'+esc(p.kind)+(sel?' sel':'')+'" style="left:'+p.x+'%;top:'+p.y+'%" data-pin="'+i+'" aria-label="'+esc(p.label)+'">'+(i+1)+(sel?'<span class="lbl">'+esc(p.label)+'</span>':'')+'</button>'}).join('');
+  return'<div class="mapbox" id="mapbox"><div class="mapinner'+(opts.placing?' placing':'')+'" id="mapinner" style="--z:'+zoom+'"><img src="'+esc(MAP_IMAGE)+'" alt="서울랜드 가이드맵" id="mapimg" draggable="false" decoding="async">'+pinHtml+'</div></div>';
+}
+function zoomBar(){return'<button class="btn small" data-zoom="-1"'+(zoom<=1?' disabled':'')+' aria-label="축소">－ 축소</button><span class="mono" style="font-size:13px;color:var(--muted)">'+Math.round(zoom*100)+'%</span><button class="btn small" data-zoom="1"'+(zoom>=4?' disabled':'')+' aria-label="확대">＋ 확대</button>'}
+function vMap(){
+  var view=mapView||(mapOk===false?'official':'ours');
+  var seg='<div class="mapbar"><div class="seg" role="group" aria-label="지도 종류"><button data-mapview="ours" aria-pressed="'+(view==='ours')+'">우리 위치 표시</button><button data-mapview="official" aria-pressed="'+(view==='official')+'">서울랜드 공식 지도</button></div><span class="sp"></span><a class="btn small" href="'+esc(S.mapLink)+'" target="_blank" rel="noopener">새 창에서 열기</a></div>';
+  if(view==='official'){
+    return'<div class="sec-h"><h2>서울랜드 공식 지도</h2><p>서울랜드 홈페이지의 가이드맵이에요. 아래에서 바로 움직여 볼 수 있어요.</p></div>'+seg+
+    '<p class="callout">지도 대신 빈 화면이나 X 표시가 보이면 위의 <b>새 창에서 열기</b>를 눌러 주세요.</p>'+
+    '<div class="official"><iframe src="'+esc(S.mapLink)+'" title="서울랜드 공식 가이드맵" loading="lazy" referrerpolicy="no-referrer"></iframe></div>'+
+    '<p class="callout">공식 지도는 서울랜드 서버에서 불러와요. 행사장에서 통신이 몰려 느리면 "우리 위치 표시" 지도를 보세요. 이 지도는 휴대폰에 저장돼 있어요.</p>';
+  }
+  var placed=S.pins.filter(function(p){return p.x!=null}).length;
+  var legend=S.pins.map(function(p,i){var has=p.x!=null;return'<li><button data-pin="'+i+'"'+(has?'':' disabled')+'><span class="pin k-'+esc(p.kind)+'">'+(i+1)+'</span><span>'+esc(p.label)+'</span><small>'+(has?(selPin===i?'표시 중':'지도에서 보기'):'위치 준비 중')+'</small></button></li>'}).join('');
+  return'<div class="sec-h"><h2>서울랜드 지도</h2><p>번호를 누르면 지도에서 이름이 보여요. 지도는 손가락으로 밀어서 움직이고, 확대 버튼으로 크게 볼 수 있어요.</p></div>'+seg+
+  '<div class="mapbar">'+zoomBar()+'</div>'+
+  mapHtml(S.pins,{sel:selPin})+
+  (S.pins.length?'<ul class="legend">'+legend+'</ul>':'')+
+  (placed===0&&mapOk!==false?'<p class="callout">지도 위 위치 표시는 선생님이 준비 중이에요.</p>':'');
+}
+function scrollToPin(i){var box=document.getElementById('mapbox'),p=S.pins[i];if(!box||!p||p.x==null)return;var inner=document.getElementById('mapinner');box.scrollTo({left:inner.offsetWidth*p.x/100-box.clientWidth/2,top:inner.offsetHeight*p.y/100-box.clientHeight/2,behavior:'smooth'})}
+
+function vFree(st){
+  var meet=m(S.meetTime),n=st.n||0,live=st.phase==='day'||st.phase==='meet';
+  var steps=[
+    {t:'공연 후',a:'공연 종료 · 반별 퇴장',b:'선생님이 부르는 순서대로 천천히 나가요',at:null},
+    {t:'퇴장 후',a:'자유시간 (점심 포함)',b:'조별로 함께 다녀요',at:null},
+    {t:hm(meet-10),a:'집결 장소로 이동',b:'놀이기구 줄은 이 시간 전에 마무리해요',at:meet-10},
+    {t:S.meetTime,a:'집결 · 반별 인원 확인',b:S.meetPlace,at:meet},
+    {t:'확인 후',a:'귀가',b:S.homeNote,at:meet+15}];
+  var k=-1;if(live)steps.forEach(function(s,i){if(s.at!=null&&n>=s.at)k=i});
+  var tlHtml=steps.map(function(s,i){var c='';if(st.phase==='home'||st.phase==='after')c='done';else if(k>-1){c=i<k?'done':i===k?'on':''}return'<li class="'+c+'"><span class="t">'+esc(s.t)+'</span><span class="dot"></span><span class="d">'+esc(s.a)+'<small>'+esc(s.b)+'</small></span></li>'}).join('');
+  var cd=st.phase==='day'?'집결까지 '+dur(st.left)+' 남았어요':st.phase==='meet'?'지금 집결 시간이에요':'늦을 것 같으면 미리 담임 선생님께 연락해요';
+  var meetPin=-1;S.pins.forEach(function(p,i){if(meetPin<0&&p.kind==='meet'&&p.x!=null)meetPin=i});
+  var chk=S.homeChecks.map(function(c,i){var id='chk-'+i;return'<label for="'+id+'"><input type="checkbox" id="'+id+'" data-chk="'+esc(c)+'"'+(checks[c]?' checked':'')+'><span>'+esc(c)+'</span></label>'}).join('');
+  return'<div class="sec-h"><h2>자유시간과 귀가</h2><p>공연이 끝나면 서울랜드에서 자유롭게 지내고, 정해진 시각에 다시 모여요.</p></div>'+
+  '<div class="meet"><span class="clock mono">'+esc(S.meetTime)+'</span><div class="info"><b>집결 장소 · '+esc(S.meetPlace)+'</b><span>'+cd+'</span></div>'+(meetPin>-1?'<button class="btn small" data-gopin="'+meetPin+'">지도에서 보기</button>':'')+'</div>'+
+  '<div class="card"><h3>오후 일정</h3><ol class="tl">'+tlHtml+'</ol></div>'+
+  '<div class="card"><h3>자유시간 약속</h3><ul class="rules">'+S.freeRules.map(function(r){return'<li>'+esc(r)+'</li>'}).join('')+'</ul></div>'+
+  '<div class="card"><h3>귀가 전 체크</h3><div class="check">'+chk+'</div><p class="callout">체크한 내용은 내 휴대폰에만 저장돼요.</p></div>';
+}
+
+function vHelp(){
+  var sit=[['길을 잃었을 때','그 자리에 멈추고 담임 선생님께 전화해요. 연결이 안 되면 가까운 서울랜드 직원에게 도움을 요청해요.'],
+    ['다치거나 아플 때','참지 말고 바로 선생님께 연락해요. 직원에게 의무실 위치를 물어봐요.'],
+    ['친구와 연락이 안 될 때','혼자 찾아다니지 말고 선생님께 먼저 알려요.'],
+    ['물건을 잃어버렸을 때','안내소에 분실 신고를 하고 선생님께도 알려요.']];
+  var cts=S.contacts.map(function(c){var who='<div class="who">'+esc(c.role)+(c.name?'<small>'+esc(c.name)+' 선생님</small>':'')+'</div>';
+    var num=c.phone?'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end"><a class="num" href="tel:'+esc(c.phone.replace(/[^0-9+]/g,''))+'">'+esc(c.phone)+'</a><button class="btn small" data-copy="'+esc(c.phone)+'">복사</button></div>':'<span class="empty">번호 입력 전</span>';
+    return'<div class="ct">'+who+num+'</div>'}).join('');
+  return'<div class="sec-h"><h2>비상 연락</h2><p>번호를 누르면 전화가 걸려요.</p></div>'+
+  '<div class="contacts">'+cts+'<div class="ct urgent"><div class="who">화재 · 응급 환자<small>소방·구급</small></div><a class="num" href="tel:119">119</a></div><div class="ct urgent"><div class="who">범죄 · 위험 상황<small>경찰</small></div><a class="num" href="tel:112">112</a></div></div>'+
+  '<div class="sit">'+sit.map(function(s){return'<div class="card"><h3>'+s[0]+'</h3><p>'+s[1]+'</p></div>'}).join('')+'</div>';
+}
+
+function render(){
+  try{renderInner()}catch(e){
+    /* 데이터가 꼬여도 화면이 하얗게 멈추지 않도록 기본 안내로 되돌림 */
+    if(S!==DEFAULT){S=DEFAULT;try{renderInner()}catch(e2){app.textContent='안내를 불러오지 못했어요. 새로고침해 주세요.'}}
+    else app.textContent='안내를 불러오지 못했어요. 새로고침해 주세요.';
+  }
+}
+function netChip(){
+  var t=online?(lastSync?'최신 안내 확인됨 '+hm(new Date(lastSync).getHours()*60+new Date(lastSync).getMinutes()):'저장된 안내 표시 중'):'오프라인 · 저장된 안내 표시 중';
+  return'<span class="netchip'+(online?'':' off')+'"><i></i>'+t+'</span>';
+}
+function renderInner(){
+  if(mode==='login')return renderLogin();
+  if(mode==='edit')return renderEditor();
+  var st=status(),v;
+  if(tab==='schedule')v=vSchedule(st);else if(tab==='safety')v=vSafety();else if(tab==='map')v=vMap();else if(tab==='free')v=vFree(st);else v=vHelp();
+  var upd=updatedAt?(function(){var d=new Date(updatedAt);return isNaN(d)?'':' · '+(d.getMonth()+1)+'/'+d.getDate()+' '+hm(d.getHours()*60+d.getMinutes())+' 수정본'})():'';
+  app.innerHTML='<div class="wrap">'+header(st)+
+   '<nav class="tabs" role="tablist">'+TABS.map(function(t){return'<button class="tab" role="tab" data-tab="'+t[0]+'" aria-selected="'+(tab===t[0])+'">'+t[1]+'</button>'}).join('')+'</nav>'+
+   '<section class="view">'+v+'</section>'+
+   '<div class="toolbar"><span style="display:grid;gap:2px">'+netChip()+'<span style="color:var(--muted);font-size:13px">현재 시각 <span class="mono">'+hm(nowMin())+'</span> 기준'+upd+'</span></span><button class="btn small" data-act="login">선생님 수정</button></div>'+
+   '<footer>'+esc(S.school)+' · '+esc(S.title)+' 운영 안내</footer></div>';
+  wireMap();
+}
+function wireMap(){var img=document.getElementById('mapimg');if(!img)return;
+  if(mapOk===null){img.addEventListener('error',function(){mapOk=false;render()});img.addEventListener('load',function(){mapOk=true})}}
+
+/* ---------- login ---------- */
+function renderLogin(){
+  app.innerHTML='<div class="wrap"><div class="card login"><h3>선생님 수정</h3>'+
+   '<form id="loginform"><div class="field"><label for="pw">관리자 비밀번호</label><input id="pw" type="password" autocomplete="current-password" required></div>'+(loginErr?'<p class="err" role="alert">'+esc(loginErr)+'</p>':'')+'<div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn" data-act="cancel">취소</button><button type="submit" class="btn primary"'+(busy?' disabled':'')+'>'+(busy?'확인 중…':'확인')+'</button></div></form>'+
+   '</div></div>';
+  var pw=document.getElementById('pw');if(pw)pw.focus();
+}
+function api(body){return fetch(SAVE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().catch(function(){return{ok:false,error:'http_'+r.status}})})}
+function errText(e){return{wrong_password:'비밀번호가 맞지 않아요.',not_configured:'버셀 환경 변수(ADMIN_PASSWORD, GITHUB_TOKEN, GITHUB_REPO)가 아직 설정되지 않았어요.',too_large:'내용이 너무 길어 저장하지 못했어요.',conflict:'다른 선생님이 동시에 저장했어요. 잠시 뒤 다시 저장해 주세요.',bad_data:'저장할 내용에 빠진 항목이 있어요.',http_404:'저장 기능은 버셀에 배포한 사이트에서만 쓸 수 있어요.'}[e]||('저장하지 못했어요('+e+'). 잠시 뒤 다시 시도해 주세요.')}
+
+/* ---------- editor ---------- */
+function renderEditor(){
+  var d=draft;
+  var rows=d.program.map(function(p,i){return'<div class="erow eprog">'+
+    '<div class="field w-type"><label for="p'+i+'-type">구분</label><input id="p'+i+'-type" list="types" data-p="'+i+'" data-k="type" value="'+esc(p.type)+'"></div>'+
+    '<div class="field"><label for="p'+i+'-title">프로그램 내용</label><input id="p'+i+'-title" data-p="'+i+'" data-k="title" value="'+esc(p.title)+'"></div>'+
+    '<div class="ops"><span class="mono">'+(i+1)+'번</span><span class="sp"></span><button class="btn small" data-mv="'+i+'" data-d="-1"'+(i===0?' disabled':'')+'>위로</button><button class="btn small" data-mv="'+i+'" data-d="1"'+(i===d.program.length-1?' disabled':'')+'>아래로</button><button class="btn small" data-ins="'+(i+1)+'">아래에 추가</button><button class="btn small" data-del="'+i+'">삭제</button></div></div>'}).join('');
+  var crow=d.contacts.map(function(c,i){return'<div class="erow ecr">'+
+    '<div class="field"><label for="c'+i+'-role">역할</label><input id="c'+i+'-role" data-c="'+i+'" data-k="role" value="'+esc(c.role)+'"></div>'+
+    '<div class="field"><label for="c'+i+'-name">이름</label><input id="c'+i+'-name" data-c="'+i+'" data-k="name" value="'+esc(c.name)+'"></div>'+
+    '<div class="field"><label for="c'+i+'-phone">전화번호</label><input id="c'+i+'-phone" type="tel" data-c="'+i+'" data-k="phone" value="'+esc(c.phone)+'"></div>'+
+    '<div class="field"><label>&nbsp;</label><button class="btn small" data-cdel="'+i+'">삭제</button></div></div>'}).join('');
+  var prow=d.pins.map(function(p,i){return'<div class="erow epin">'+
+    '<div class="field"><label for="m'+i+'-label">'+(i+1)+'번 위치 이름</label><input id="m'+i+'-label" data-m="'+i+'" data-k="label" value="'+esc(p.label)+'"></div>'+
+    '<div class="field"><label for="m'+i+'-kind">종류</label><select id="m'+i+'-kind" data-m="'+i+'" data-k="kind">'+KINDS.map(function(k){return'<option value="'+k[0]+'"'+(p.kind===k[0]?' selected':'')+'>'+k[1]+'</option>'}).join('')+'</select></div>'+
+    '<div class="ops"><span>'+(p.x!=null?'지도에 표시됨':'아직 지도에 없음')+'</span><span class="sp"></span><button class="btn small'+(placing===i?' primary':'')+'" data-place="'+i+'">'+(placing===i?'지도를 눌러 주세요':'지도에서 위치 찍기')+'</button>'+(p.x!=null?'<button class="btn small" data-unplace="'+i+'">위치 지우기</button>':'')+'<button class="btn small" data-mdel="'+i+'">삭제</button></div></div>'}).join('');
+  function f(id,label,val,type){return'<div class="field"><label for="'+id+'">'+label+'</label><input id="'+id+'" type="'+(type||'text')+'" data-s="'+id.slice(2)+'" value="'+esc(val)+'"></div>'}
+  function ta(key,label){return'<div class="field"><label for="t-'+key+'">'+label+' (한 줄에 하나씩)</label><textarea id="t-'+key+'" data-l="'+key+'">'+esc((d[key]||[]).join('\n'))+'</textarea></div>'}
+  app.innerHTML='<div class="wrap"><div class="editor">'+
+   '<div class="sec-h"><h2>식순·안내 수정</h2><p>저장하면 사이트가 새로 배포되고(약 1분), 학생 화면에는 그 뒤 3분 안에 반영돼요.</p></div>'+
+   '<div class="card"><h3>기본 정보</h3><div class="grid2">'+f('s-date','행사 날짜',d.date,'date')+f('s-venue','장소',d.venue)+f('s-start','공연 시작',d.start,'time')+f('s-meetTime','집결 시각',d.meetTime,'time')+f('s-meetPlace','집결 장소',d.meetPlace)+f('s-homeNote','귀가 방법',d.homeNote)+'</div></div>'+
+   '<div class="card"><h3>식순 <span class="mono" style="font-weight:400;color:var(--muted);font-size:14px">'+d.program.length+'개</span></h3><div class="erows">'+rows+'</div><button class="btn" data-ins="'+d.program.length+'">순서 추가</button>'+
+   '<datalist id="types"><option value="개회식"><option value="공식행사"><option value="개인공연"><option value="동아리공연"><option value="특별공연"><option value="특별영상"><option value="밴드공연"><option value="폐회식"></datalist></div>'+
+   '<div class="card"><h3>지도 위치 표시</h3><p class="callout">"지도에서 위치 찍기"를 누른 뒤 아래 지도에서 그 장소를 누르면 번호가 표시돼요.</p><div class="erows">'+prow+'</div><button class="btn" data-act="madd">위치 추가</button><div class="mapbar">'+zoomBar()+'</div>'+mapHtml(d.pins,{placing:placing>-1})+'</div>'+
+   '<div class="card"><h3>안전·자유시간 안내</h3>'+ta('watchRules','관람 수칙')+ta('evacSteps','비상 대피 순서')+ta('freeRules','자유시간 약속')+ta('homeChecks','귀가 전 체크 항목')+'</div>'+
+   '<div class="card"><h3>비상 연락처</h3><div class="erows">'+crow+'</div><button class="btn" data-act="cadd">연락처 추가</button></div>'+
+   '<div class="savebar"><span class="msg" id="savemsg">'+(busy?'저장 중…':'바꾼 내용은 저장을 눌러야 반영돼요.')+'</span><button class="btn" data-act="cancel">취소</button><button class="btn primary" data-act="save"'+(busy?' disabled':'')+'>저장</button></div>'+
+   '</div></div>';
+  wireMap();
+}
+function setMsg(t){var e=document.getElementById('savemsg');if(e)e.textContent=t}
+function toast(t){var e=document.createElement('div');e.className='toast';e.setAttribute('role','status');e.textContent=t;document.body.appendChild(e);setTimeout(function(){e.remove()},3800)}
+function validate(d){
+  if(!/^\d{2}:\d{2}$/.test(d.start))return'공연 시작 시각을 확인해 주세요.';
+  if(!/^\d{2}:\d{2}$/.test(d.meetTime))return'집결 시각을 확인해 주세요.';
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d.date))return'행사 날짜를 확인해 주세요.';
+  for(var i=0;i<d.program.length;i++){var p=d.program[i];if(!String(p.title).trim())return(i+1)+'번 순서의 내용이 비어 있어요.'}
+  return null;
+}
+function save(){
+  var err=validate(draft);if(err){setMsg(err);return}
+  busy=true;setMsg('저장 중…');
+  api({action:'save',password:adminPw,data:draft}).then(function(r){busy=false;
+    if(!r.ok){setMsg(errText(r.error));return}
+    S=merge(draft);updatedAt=r.updated||new Date().toISOString();
+    try{localStorage.setItem(CACHE,JSON.stringify({data:S,updated:updatedAt}))}catch(e){}
+    mode='view';draft=null;placing=-1;render();toast('저장했어요. 약 1~4분 뒤 모든 학생 화면에 반영돼요.');
+  }).catch(function(){busy=false;setMsg('인터넷 연결을 확인하고 다시 저장해 주세요.')});
+}
+
+/* ---------- data sync ---------- */
+var loading=false;
+function load(){
+  if(loading)return;loading=true;
+  var ctl=window.AbortController?new AbortController():null,timer=setTimeout(function(){if(ctl)ctl.abort()},8000);
+  fetch(DATA_URL,{cache:'no-cache',signal:ctl?ctl.signal:undefined}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(r){
+    clearTimeout(timer);loading=false;var wasOff=!online;online=true;lastSync=Date.now();
+    var changed=r&&valid(r.data)&&String(r.updated||'')>String(updatedAt||'');
+    if(changed){S=merge(r.data);updatedAt=r.updated;try{localStorage.setItem(CACHE,JSON.stringify({data:S,updated:updatedAt}))}catch(e){}}
+    if(mode==='view'&&(changed||wasOff||tab!=='map'))render();
+  }).catch(function(){clearTimeout(timer);loading=false;if(online){online=false;if(mode==='view'&&tab!=='map')render()}});
+}
+
+/* ---------- events ---------- */
+app.addEventListener('click',function(ev){
+  var inner=ev.target.closest('#mapinner');
+  if(inner&&mode==='edit'&&placing>-1&&!ev.target.closest('.pin')){
+    var r=inner.getBoundingClientRect();draft.pins[placing].x=+((ev.clientX-r.left)/r.width*100).toFixed(2);draft.pins[placing].y=+((ev.clientY-r.top)/r.height*100).toFixed(2);
+    var box=document.getElementById('mapbox'),sl=box.scrollLeft,stp=box.scrollTop;placing=-1;render();var nb=document.getElementById('mapbox');if(nb){nb.scrollLeft=sl;nb.scrollTop=stp}return}
+  var b=ev.target.closest('button');if(!b)return;
+  if(b.dataset.tab){tab=b.dataset.tab;try{history.replaceState(null,'','#'+tab)}catch(e){}render();window.scrollTo({top:0});return}
+  if(b.dataset.filter){filter=b.dataset.filter;render();return}
+  if(b.dataset.mapview){mapView=b.dataset.mapview;var ys=window.scrollY;render();window.scrollTo(0,ys);return}
+  if(b.dataset.zoom){var box0=document.getElementById('mapbox'),fx=box0?(box0.scrollLeft+box0.clientWidth/2)/box0.scrollWidth:.5,fy=box0?(box0.scrollTop+box0.clientHeight/2)/box0.scrollHeight:.5;
+    zoom=Math.max(1,Math.min(4,zoom+(+b.dataset.zoom)));var y=window.scrollY;render();window.scrollTo(0,y);var nb2=document.getElementById('mapbox');if(nb2){nb2.scrollLeft=fx*nb2.scrollWidth-nb2.clientWidth/2;nb2.scrollTop=fy*nb2.scrollHeight-nb2.clientHeight/2}return}
+  if(b.dataset.pin!=null&&mode==='view'){var i=+b.dataset.pin;selPin=(selPin===i&&b.classList.contains('pin'))?-1:i;var y2=window.scrollY;render();window.scrollTo(0,y2);if(selPin>-1){if(zoom<2){zoom=2;render();window.scrollTo(0,y2)}scrollToPin(selPin);var mb=document.getElementById('mapbox');if(mb&&mb.getBoundingClientRect().top<0)mb.scrollIntoView({behavior:'smooth',block:'start'})}return}
+  if(b.dataset.gopin!=null){tab='map';mapView='ours';selPin=+b.dataset.gopin;zoom=2;render();window.scrollTo({top:0});setTimeout(function(){scrollToPin(selPin)},150);return}
+  if(b.dataset.copy!=null){var t=b.dataset.copy,ok=function(){b.textContent='복사됨';setTimeout(function(){b.textContent='복사'},1500)};
+    if(navigator.clipboard)navigator.clipboard.writeText(t).then(ok,function(){});return}
+  var a=b.dataset.act;
+  if(a==='login'){loginErr='';mode=adminPw?'edit':'login';if(mode==='edit'){draft=JSON.parse(JSON.stringify(S))}render();window.scrollTo({top:0});return}
+  if(a==='cancel'){mode='view';draft=null;placing=-1;loginErr='';render();load();return}
+  if(a==='save'){save();return}
+  if(a==='cadd'){draft.contacts.push({role:'',name:'',phone:''});render();return}
+  if(a==='madd'){draft.pins.push({label:'',kind:'etc',x:null,y:null});render();return}
+  if(b.dataset.mv!=null){var k=+b.dataset.mv,j=k+(+b.dataset.d),P=draft.program,x=P[k];P[k]=P[j];P[j]=x;render();return}
+  if(b.dataset.ins!=null){draft.program.splice(+b.dataset.ins,0,{type:'개인공연',title:''});render();var el=document.getElementById('p'+b.dataset.ins+'-title');if(el)el.focus();return}
+  if(b.dataset.del!=null){draft.program.splice(+b.dataset.del,1);render();return}
+  if(b.dataset.cdel!=null){draft.contacts.splice(+b.dataset.cdel,1);render();return}
+  if(b.dataset.mdel!=null){draft.pins.splice(+b.dataset.mdel,1);placing=-1;render();return}
+  if(b.dataset.place!=null){var pi=+b.dataset.place;placing=(placing===pi)?-1:pi;render();if(placing>-1){var mb2=document.getElementById('mapbox');if(mb2)mb2.scrollIntoView({behavior:'smooth',block:'center'})}return}
+  if(b.dataset.unplace!=null){var u=draft.pins[+b.dataset.unplace];u.x=null;u.y=null;render();return}
+});
+app.addEventListener('submit',function(ev){
+  if(ev.target.id!=='loginform')return;ev.preventDefault();
+  var pw=document.getElementById('pw').value;busy=true;loginErr='';render();
+  api({action:'check',password:pw}).then(function(r){busy=false;
+    if(r.ok){adminPw=pw;draft=JSON.parse(JSON.stringify(S));mode='edit'}else loginErr=errText(r.error);render();
+  }).catch(function(){busy=false;loginErr='서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.';render()});
+});
+app.addEventListener('input',function(ev){
+  var e=ev.target;if(!draft)return;
+  if(e.dataset.p!=null){var p=draft.program[+e.dataset.p];p[e.dataset.k]=e.value}
+  else if(e.dataset.c!=null)draft.contacts[+e.dataset.c][e.dataset.k]=e.value;
+  else if(e.dataset.m!=null)draft.pins[+e.dataset.m][e.dataset.k]=e.value;
+  else if(e.dataset.s){draft[e.dataset.s]=e.value}
+  else if(e.dataset.l)draft[e.dataset.l]=e.value.split('\n').map(function(s){return s.trim()}).filter(Boolean);
+});
+app.addEventListener('change',function(ev){var e=ev.target;
+  if(e.dataset.chk!=null){checks[e.dataset.chk]=e.checked;try{localStorage.setItem(LSCHK,JSON.stringify(checks))}catch(x){}}
+  if(e.dataset.m!=null&&e.dataset.k==='kind'&&draft)render();});
+
+render();
+/* 350명이 같은 순간에 요청하지 않도록 첫 확인과 주기 확인을 사람마다 조금씩 어긋나게 */
+setTimeout(load,Math.random()*1500);
+setInterval(function(){if(mode==='view'&&tab!=='map'&&!document.hidden)render()},30000);
+(function poll(){setTimeout(function(){if(!document.hidden)load();poll()},POLL_MS*(0.75+Math.random()*0.5))})();
+var lastVis=0;
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&Date.now()-lastVis>30000){lastVis=Date.now();load()}});
+window.addEventListener('online',function(){load()});
+window.addEventListener('offline',function(){online=false;if(mode==='view'&&tab!=='map')render()});
+/* 오프라인 저장: 한 번 열면 다음부터는 통신이 안 돼도 열려요 */
+if('serviceWorker' in navigator&&location.protocol==='https:'){
+  window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
+}
+})();
+</script>
+</body>
+</html>
