@@ -630,22 +630,20 @@ function applyAnn(){
   else{if(ov)hideAnn();if(!annBarOn)render()}
 }
 /* ---------- 아침 집결 팝업: 행사 당일 아침 집결 시각(08:50)이 지나면 더 이상 뜨지 않음 ----------
- * 행사 전날까지는 하루 한 번, 행사 당일에는 열 때마다 띄움. 선생님 공지가 떠 있으면 공지가 먼저 */
-var LSMORN='hanumul2026-morn-seen';
+ * 사이트를 열 때마다 띄움. 선생님 공지가 떠 있으면 공지가 먼저 */
 function mornEnd(){var mt=S.morningTime||'';if(!/^\d{1,2}:\d{2}$/.test(mt))return 0;var d=new Date(S.date+'T'+(mt.length<5?'0'+mt:mt)+':00');return isNaN(d)?0:d.getTime()}
 function mornActive(){var e=mornEnd();return e>0&&Date.now()<e}
 function hideMorn(){var o=document.getElementById('mornov');if(o)o.remove()}
 function showMorn(){
   if(mode!=='view'||!mornActive()||document.getElementById('annov')||document.getElementById('mornov'))return;
-  var td=ymd(new Date()),today=td===S.date;
-  if(!today){var seen='';try{seen=localStorage.getItem(LSMORN)||''}catch(e){}if(seen===td)return}
+  var today=ymd(new Date())===S.date;
   var mt=S.morningTime,mp=S.morningPlace||'집결 장소',d=new Date(S.date+'T00:00:00');
   var when=today?'오늘':(d.getMonth()+1)+'월 '+d.getDate()+'일('+'일월화수목금토'[d.getDay()]+')';
   var left=today?'<span class="ann-time">'+dur((mornEnd()-Date.now())/60000)+' 남았어요</span>':'';
   var o=document.createElement('div');o.className='ann';o.id='mornov';o.tabIndex=-1;o.setAttribute('role','alertdialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','아침 집결 안내');
   o.innerHTML='<div class="ann-card"><span class="tag">🚩 아침 집결</span><p class="ann-text">'+esc(when)+' <span class="mono">'+esc(mt)+'</span>까지<br>'+esc(mp)+ro(mp)+'<br>모여요</p>'+left+
    '<span class="ann-hint" style="color:var(--ink)">늦을 것 같으면 담임 선생님께 미리 연락해요</span><span class="ann-hint">화면을 누르면 닫혀요</span></div>';
-  o.addEventListener('click',function(){try{localStorage.setItem(LSMORN,ymd(new Date()))}catch(e){}hideMorn()});
+  o.addEventListener('click',hideMorn);
   document.body.appendChild(o);o.focus();
 }
 function loadAnn(){
