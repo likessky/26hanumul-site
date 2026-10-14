@@ -225,6 +225,8 @@ footer{color:var(--muted);font-size:12px;text-align:center}
 "date":"2026-10-28",
 "venue":"서울랜드 이벤트홀",
 "start":"09:30",
+"morningTime":"08:50",
+"morningPlace":"서울랜드 정문",
 "meetTime":"16:00",
 "meetPlace":"서울랜드 정문 앞 (확정되면 수정)",
 "homeNote":"반별 인원 확인이 끝나면 담임 선생님 안내에 따라 귀가",
@@ -324,6 +326,8 @@ function dur(n){n=Math.max(0,Math.round(n));var h=Math.floor(n/60),mm=n%60;retur
 function kind(t){t=t||'';if(t.indexOf('영상')>-1)return'video';if(t.indexOf('공연')>-1)return'perf';return'cer'}
 function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function fmtDate(s){var d=new Date(s+'T00:00:00');if(isNaN(d))return s;return d.getFullYear()+'. '+(d.getMonth()+1)+'. '+d.getDate()+'.('+'일월화수목금토'[d.getDay()]+')'}
+/* 받침에 맞춰 '로/으로' (받침 없거나 ㄹ이면 '로') */
+function ro(s){var c=String(s).trim().charCodeAt(String(s).trim().length-1)-0xAC00;if(!(c>=0&&c<11172))return'로';var j=c%28;return(j===0||j===8)?'로':'으로'}
 function nowMin(){var d=new Date();return d.getHours()*60+d.getMinutes()+d.getSeconds()/60}
 
 /* 공연 진행은 늦어질 수 있어 순서별 시각은 쓰지 않고, 고정된 시작·집결 시각만 기준으로 삼아요 */
@@ -344,8 +348,9 @@ function header(){
 }
 /* 메인(식순 탭) 맨 위: 큰 교표 링 + 행사 이름 + 지금 상태 + 꼭 알아야 할 정보 4칸 */
 function hero(st){
-  var tag,txt;
-  if(st.phase==='before'){tag='D-'+st.days;txt=esc(S.start)+' 시작 · '+esc(S.meetTime)+' 집결'}
+  var tag,txt,mt=/^\d{1,2}:\d{2}$/.test(S.morningTime||'')?S.morningTime:'',mp=S.morningPlace||'';
+  if(st.phase==='before'){tag='D-'+st.days;txt=(mt?esc(mt)+' '+esc(mp||'아침')+' 집결 · ':'')+esc(S.start)+' 시작 · '+esc(S.meetTime)+' 집결'}
+  else if(st.phase==='pre'&&mt&&st.n<m(mt)){tag='오늘';txt=esc(mt)+'까지 '+(mp?esc(mp)+ro(mp)+' ':'')+'모여요 · '+dur(m(mt)-st.n)+' 남음'}
   else if(st.phase==='pre'){tag='오늘';txt=esc(S.start)+' 개회까지 '+dur(st.left)}
   else if(st.phase==='day'){tag='진행 중';txt=esc(S.meetTime)+' 집결까지 '+dur(st.left)}
   else if(st.phase==='meet'){tag='집결';txt='지금 모이세요 · '+esc(S.meetPlace)}
@@ -544,7 +549,7 @@ function renderEditor(){
   app.innerHTML='<div class="wrap plain"><div class="editor">'+
    '<div class="sec-h"><h2>식순·안내 수정</h2><p>맨 위 공지는 바로 보내져요. 아래 내용은 저장하면 사이트가 새로 배포되고(약 1분), 학생 화면에는 그 뒤 3분 안에 반영돼요.</p></div>'+
    annCard()+
-   '<div class="card"><h3>기본 정보</h3><div class="grid2">'+f('s-date','행사 날짜',d.date,'date')+f('s-venue','장소',d.venue)+f('s-start','공연 시작',d.start,'time')+f('s-meetTime','집결 시각',d.meetTime,'time')+f('s-meetPlace','집결 장소',d.meetPlace)+f('s-homeNote','귀가 방법',d.homeNote)+'</div></div>'+
+   '<div class="card"><h3>기본 정보</h3><div class="grid2">'+f('s-date','행사 날짜',d.date,'date')+f('s-venue','장소',d.venue)+f('s-start','공연 시작',d.start,'time')+f('s-morningTime','아침 집결 시각',d.morningTime,'time')+f('s-morningPlace','아침 집결 장소',d.morningPlace)+f('s-meetTime','집결 시각',d.meetTime,'time')+f('s-meetPlace','집결 장소',d.meetPlace)+f('s-homeNote','귀가 방법',d.homeNote)+'</div></div>'+
    '<div class="card"><h3>비상 연락처</h3><div class="erows">'+crow+'</div><button class="btn" data-act="cadd">연락처 추가</button></div>'+
    '<div class="card"><h3>지도 위치 표시</h3><p class="callout">"지도에서 위치 찍기"를 누른 뒤 아래 지도에서 그 장소를 누르면 번호가 표시돼요.</p><div class="erows">'+prow+'</div><button class="btn" data-act="madd">위치 추가</button>'+mapBlock(d.pins,{placing:placing>-1})+'</div>'+
    '<div class="card"><h3>식순 <span class="mono" style="font-weight:400;color:var(--muted);font-size:14px">'+d.program.length+'개</span></h3><div class="erows">'+rows+'</div><button class="btn" data-ins="'+d.program.length+'">순서 추가</button>'+
@@ -555,7 +560,7 @@ function renderEditor(){
   wireMap();
 }
 /* 공지 보내기 (관리자). 저장 버튼과 별개로 바로 전송 */
-var ANN_PRESETS=['이제 공연을 시작합니다. 무대에 집중해 주세요.','잠시 후 다음 순서가 시작돼요. 자리로 돌아와 주세요.','공연이 끝났어요. 선생님 안내에 따라 천천히 퇴장해요.','16:00까지 집결 장소로 모여 주세요.'];
+var ANN_PRESETS=['08:50까지 서울랜드 정문으로 모여 주세요.','이제 공연을 시작합니다. 무대에 집중해 주세요.','잠시 후 다음 순서가 시작돼요. 자리로 돌아와 주세요.','공연이 끝났어요. 선생님 안내에 따라 천천히 퇴장해요.','16:00까지 집결 장소로 모여 주세요.'];
 var annDraft={text:'',minutes:10},annMsg='',annBusy=false;
 function annCard(){
   var cur=annActive()?'<p class="callout">지금 떠 있는 공지: <b>'+esc(ann.text)+'</b> ('+Math.max(1,Math.ceil((new Date(ann.until)-Date.now())/60000))+'분 남음)</p>':'';
@@ -587,6 +592,7 @@ function toast(t){var e=document.createElement('div');e.className='toast';e.setA
 function validate(d){
   if(!/^\d{2}:\d{2}$/.test(d.start))return'공연 시작 시각을 확인해 주세요.';
   if(!/^\d{2}:\d{2}$/.test(d.meetTime))return'집결 시각을 확인해 주세요.';
+  if(d.morningTime&&!/^\d{2}:\d{2}$/.test(d.morningTime))return'아침 집결 시각을 확인해 주세요.';
   if(!/^\d{4}-\d{2}-\d{2}$/.test(d.date))return'행사 날짜를 확인해 주세요.';
   for(var i=0;i<d.program.length;i++){var p=d.program[i];if(!String(p.title).trim())return(i+1)+'번 순서의 내용이 비어 있어요.'}
   return null;
