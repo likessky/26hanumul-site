@@ -87,7 +87,7 @@ button.fact{cursor:pointer}
 @media (max-width:400px){.ring{width:96px;height:96px}}
 /* 아래 고정 탭 (인스타그램 앱 하단 바) */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--bg);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
-.nav div{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.nav div{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
 .tab{border:0;background:none;height:var(--nav-h);display:grid;place-items:center;align-content:center;gap:3px;cursor:pointer;color:var(--muted);font-size:12px;font-weight:600;padding:0 2px;white-space:nowrap}
 .tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tab[aria-selected="true"]{color:var(--ink)}
@@ -213,6 +213,33 @@ section.view{display:grid;gap:16px}
 .err{color:var(--danger-ink);font-size:14px;margin:0}
 .toast{position:fixed;left:50%;bottom:calc(var(--nav-h) + 16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;max-width:calc(100% - 32px);z-index:40}
 footer{color:var(--muted);font-size:12px;text-align:center}
+
+/* 퀴즈 */
+.qcard{gap:12px}
+.qtext{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:17px;line-height:1.55}
+.qimg{display:block;width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:var(--subtle)}
+.qopts{display:grid;gap:8px}
+.qopt{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 14px;font-size:17px;font-weight:600;cursor:pointer;min-height:50px}
+.qopt b{font-size:20px;flex:none}
+.qopt[aria-pressed="true"]{border-color:var(--action);background:var(--action);color:var(--action-ink)}
+.qshort{width:100%;border:1px solid var(--line);background:var(--subtle);border-radius:12px;padding:12px 14px;font-size:17px;min-height:50px}
+.qbar{position:fixed;left:0;right:0;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));z-index:9;background:var(--bg);border-top:1px solid var(--line)}
+.qbar div{max-width:760px;margin:0 auto;padding:10px 16px;display:flex;gap:10px;align-items:center}
+.qbar span{flex:1;font-weight:600}
+.qspace{height:56px}
+.qdone{justify-items:center;text-align:center}
+.qcode{font-size:56px;line-height:1.1;font-weight:800;letter-spacing:.12em}
+.qres{display:flex;gap:10px;align-items:flex-start}
+.qres i{font-style:normal;font-weight:800;flex:none}
+.qres.ok i{color:var(--ok)}.qres.no i{color:var(--danger-ink)}
+.qres small{display:block;color:var(--muted);font-size:13px}
+.qtable{overflow-x:auto}
+.qtable table{border-collapse:collapse;width:100%;font-size:13px}
+.qtable th,.qtable td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;white-space:nowrap}
+.qid{display:grid;gap:10px}
+.qid .field input{font-size:17px}
+.qedit{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--subtle);display:grid;gap:8px}
+.qedit img{max-width:220px;border-radius:8px;border:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -231,6 +258,7 @@ footer{color:var(--muted);font-size:12px;text-align:center}
 "meetPlace":"서울랜드 정문 앞 (확정되면 수정)",
 "homeNote":"반별 인원 확인이 끝나면 담임 선생님 안내에 따라 귀가",
 "mapLink":"https://seoulland.co.kr/?p=13&type=attraction&key=&idx=59",
+"quizBackup":"",
 "program":[
   {"type":"개회식","title":"안전 및 학교폭력예방교육 영상 시청 (비상 대피요령 포함)"},
   {"type":"공식행사","title":"교장선생님 개회사 및 내빈 소개, 학교운영위원장님 축사"},
@@ -310,7 +338,7 @@ var S=DEFAULT, updatedAt='';
 try{var c=JSON.parse(localStorage.getItem(CACHE)||'null');if(c&&valid(c.data)){S=merge(c.data);updatedAt=c.updated||''}}catch(e){}
 var mode='view', draft=null, filter='all', adminPw='', zoom=null, selPin=-1, placing=-1, loginErr='', busy=false;
 var mapOk=null, mapFull=false, MAXZ=6, online=navigator.onLine!==false, lastSync=0;
-var TABS=[['schedule','식순'],['safety','관람 안전'],['map','지도'],['free','자유시간·귀가'],['help','비상 연락']];
+var TABS=[['schedule','식순'],['safety','관람 안전'],['map','지도'],['free','자유·귀가'],['quiz','퀴즈'],['help','비상 연락']];
 var KINDS=[['stage','공연장'],['meet','집결'],['aid','의무실'],['info','안내소'],['teacher','선생님'],['etc','기타']];
 var tab='schedule';
 try{var h=(location.hash||'').slice(1);if(TABS.some(function(t){return t[0]===h}))tab=h}catch(e){}
@@ -368,6 +396,7 @@ var ICON={schedule:'<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r
   safety:'<path d="M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6Z"/><path d="m9 12 2 2 4-4"/>',
   map:'<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z"/><path d="M9 4v14M15 6v14"/>',
   free:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  quiz:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7"/><path d="M12 17h.01"/>',
   help:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>'};
 
 function vSchedule(st){
@@ -477,7 +506,7 @@ function renderInner(){
   if(mode==='edit')return renderEditor();
   var st=status(),v;
   if(tab!=='map')mapFull=false;
-  if(tab==='schedule')v=vSchedule(st);else if(tab==='safety')v=vSafety();else if(tab==='map')v=vMap();else if(tab==='free')v=vFree(st);else v=vHelp();
+  if(tab==='schedule')v=vSchedule(st);else if(tab==='safety')v=vSafety();else if(tab==='map')v=vMap();else if(tab==='free')v=vFree(st);else if(tab==='quiz')v=vQuiz();else v=vHelp();
   var upd=updatedAt?(function(){var d=new Date(updatedAt);return isNaN(d)?'':' · '+(d.getMonth()+1)+'/'+d.getDate()+' '+hm(d.getHours()*60+d.getMinutes())+' 수정본'})():'';
   /* 메인 소개(교표·상태·정보 4칸)는 식순 탭에만, 다른 탭은 위 줄만 보여서 본문이 넓어요 */
   var bar=(annActive()&&ann.id===annClosed)?'<button class="annbar" data-act="annopen"><span aria-hidden="true">📢</span><span>'+esc(ann.text)+'</span></button>':'';
@@ -518,6 +547,234 @@ function wireMap(){
   box.addEventListener('pointerup',up);box.addEventListener('pointerleave',up);
 }
 
+/* ---------- 퀴즈 (학생) ----------
+ * 문제는 /api/quiz(버셀 CDN이 2초 캐시)에서 받고, 답은 풀면서 바로 휴대폰에 저장해요.
+ * 제출은 다 푼 뒤 한 번만, 통신이 약하면 자동으로 다시 보내요. */
+var QAPI='api/quiz',LSQME='hanumul2026-quiz-me',LSQ='hanumul2026-quiz',LSQQ='hanumul2026-quiz-q';
+var CIRC='①②③④⑤',SID_RE=/^\d{5}$/; // 학번 형식을 바꾸면 api/quiz.js의 SID_RE도 같이 바꿔 주세요
+function rnd(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36)}
+function lsGet(k,d){try{var v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function qNew(id){return{id:id||'',ans:[],nonce:rnd(),submitted:null,tries:0,shownAt:0,ce:0,pending:false,err:''}}
+var Q=lsGet(LSQQ,null),qme=lsGet(LSQME,{sid:'',name:'',ok:false}),qs=lsGet(LSQ,null)||qNew('');
+var qLoading=false,qFlight=false,qRetry=null,qMsg='';
+function qSigOf(){return Q?Q.id+'|'+Q.status+'|'+Q.reveal+'|'+(Q.questions?Q.questions.length:0):''}
+var qSig=qSigOf();
+/* index.html과 api/quiz.js의 norm()은 똑같이 유지 */
+function qNorm(s){return String(s==null?'':s).normalize('NFKC').toLowerCase().replace(/[\s​.,!?'"`~\-_:;()\[\]{}<>\/\\·…]/g,'')}
+function qIdOk(){return SID_RE.test(qme.sid||'')&&String(qme.name||'').trim().length>0&&String(qme.name).length<=20}
+function qBusy(){return !!(Q&&Q.status==='open'&&qs.id===Q.id&&!qs.submitted&&(tab==='quiz'||qAnswered()>0))}
+function qUI(){if(tab==='quiz'&&mode==='view')render()}
+function qCount(){var e=document.getElementById('qcount');if(e&&Q&&Q.questions)e.textContent=qAnswered()+' / '+Q.questions.length+' 답함'}
+function qAnswered(){var c=0;if(Q&&Q.questions)Q.questions.forEach(function(q,i){if(qs.ans[i]!=null&&String(qs.ans[i]).trim()!=='')c++});return c}
+function qGrade(i){var q=Q.questions[i],a=qs.ans[i];if(a==null||String(a)==='')return false;
+  if(q.type==='choice')return Number(a)===q.answer;
+  var n=qNorm(a);return !!n&&(q.answer||[]).some(function(x){return qNorm(x)===n})}
+function qLoad(){
+  if(qLoading)return;qLoading=true;
+  var ctl=window.AbortController?new AbortController():null,timer=setTimeout(function(){if(ctl)ctl.abort()},8000);
+  fetch(QAPI,{cache:'no-cache',signal:ctl?ctl.signal:undefined}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(j){
+    clearTimeout(timer);qLoading=false;
+    if(!j||typeof j!=='object'||typeof j.status!=='string')return;
+    Q=j;lsSet(LSQQ,Q);
+    if(Q.id&&qs.id!==Q.id){clearTimeout(qRetry);qs=qNew(Q.id);lsSet(LSQ,qs)} // 새 회차면 이전 답은 비움
+    if(Q.status==='open'&&qs.id===Q.id&&!qs.shownAt){qs.shownAt=Date.now();lsSet(LSQ,qs)}
+    var sig=qSigOf();if(sig!==qSig){qSig=sig;qUI()}
+    if(typeof qSched==='function')qSched();
+  }).catch(function(){clearTimeout(timer);qLoading=false}); // 실패하면 조용히 넘어가고 다음 확인 때 다시
+}
+function qDelay(){var s=Q?Q.status:'off';return(s==='ready'?3:s==='open'?15:s==='closed'?20:30)*1000*(0.75+Math.random()*0.5)}
+function qErrText(e){return{duplicate:'이 학번으로 이미 제출된 답이 있어요. 담임 선생님께 알려 주세요.',closed:'마감되어 제출되지 않았어요.',stale:'퀴즈가 새로 시작됐어요. 화면을 새로고침해 주세요.',bad_sid:'학번을 확인해 주세요.',bad_name:'이름을 확인해 주세요.',full:'제출이 가득 찼어요. 선생님께 알려 주세요.'}[e]||('제출하지 못했어요('+e+').')}
+function qBackupBtn(){var u=S.quizBackup||'';return /^https:\/\//.test(u)?'<a class="btn small primary" href="'+esc(u)+'" target="_blank" rel="noopener">예비 제출 열기</a>':''}
+function qRetryLater(){
+  var d=[2,4,8,15,30][Math.min(Math.max(qs.tries,1)-1,4)]*1000*(0.7+Math.random()*0.6);
+  clearTimeout(qRetry);qRetry=setTimeout(function(){qSubmit()},d);qUI();
+}
+function qSubmit(){
+  if(qFlight||qs.submitted||!Q||qs.id!==Q.id||!Q.questions)return;
+  clearTimeout(qRetry);
+  if(!qs.ce)qs.ce=Math.max(0,Date.now()-(qs.shownAt||Date.now())); // 휴대폰에서 문제를 본 뒤 제출까지 걸린 시간(참고용)
+  qs.tries=(qs.tries||0)+1;qs.pending=true;qs.err='';lsSet(LSQ,qs);
+  qFlight=true;qUI();
+  var ans=Q.questions.map(function(q,i){return qs.ans[i]==null?'':String(qs.ans[i])});
+  var ctl=window.AbortController?new AbortController():null,timer=setTimeout(function(){if(ctl)ctl.abort()},10000);
+  fetch(QAPI,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctl?ctl.signal:undefined,
+    body:JSON.stringify({action:'submit',quizId:qs.id,sid:qme.sid,name:String(qme.name).trim(),ans:ans,ce:qs.ce,tries:qs.tries,nonce:qs.nonce})
+  }).then(function(r){return r.json().catch(function(){return{ok:false,error:'http_'+r.status}}).then(function(j){j.http=r.status;return j})}).then(function(j){
+    clearTimeout(timer);qFlight=false;
+    if(j.ok){qs.submitted={code:j.code,at:j.at};qs.pending=false;qs.err='';lsSet(LSQ,qs);qUI();
+      if(typeof needReload!=='undefined'&&needReload&&typeof freshReload==='function')freshReload();return}
+    if(j.http>=500||j.error==='redis'||j.error==='not_configured'){qRetryLater();return} // 서버·통신 문제: 계속 다시 보냄
+    qs.pending=false;qs.err=j.error||'error';lsSet(LSQ,qs);qUI(); // 중복·마감 등: 다시 보내도 소용없음
+  }).catch(function(){clearTimeout(timer);qFlight=false;qRetryLater()});
+}
+function qPendingBox(){
+  var more=qs.tries>=6?'<p class="callout">계속 안 되면 예비 제출을 써 주세요. (이 화면은 계속 다시 보내요)</p><div>'+qBackupBtn()+'</div>':'';
+  return '<div class="card"><h3>연결이 약해 다시 보내는 중이에요</h3><p class="callout">'+qs.tries+'번째 시도 · 답은 휴대폰에 저장돼 있으니 이 화면을 닫지 말고 기다려 주세요.</p>'+more+'</div>'}
+function qIdForm(){
+  return '<div class="card qid"><h3>학번과 이름</h3><div class="field"><label for="q-sid">학번 (5자리 숫자)</label><input id="q-sid" inputmode="numeric" pattern="[0-9]*" maxlength="5" autocomplete="off" data-qme="sid" value="'+esc(qme.sid)+'"></div>'+
+   '<div class="field"><label for="q-name">이름</label><input id="q-name" maxlength="20" autocomplete="off" data-qme="name" value="'+esc(qme.name)+'"></div>'+
+   (qMsg?'<p class="err" role="alert">'+esc(qMsg)+'</p>':'')+'<button class="btn primary" data-act="qready">확인</button>'+
+   '<p class="callout">학번·이름은 수상자를 확인할 때만 쓰고, 행사가 끝나면 지워요.</p></div>'}
+function qDone(){
+  var d=new Date(qs.submitted.at),t=isNaN(d)?'':String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+  var shown=Q.status==='closed'&&Q.reveal;
+  return '<div class="card qdone"><span class="tag">제출 완료</span><div class="qcode mono">'+esc(qs.submitted.code)+'</div><p style="margin:0">접수 번호예요. 상품을 받을 때 이 화면을 보여 줘요.</p>'+
+   '<p class="callout">'+esc(qme.sid)+' '+esc(qme.name)+(t?' · '+t+' 접수':'')+'</p>'+(shown?'':'<p style="margin:0;color:var(--muted)">점수와 정답은 선생님이 공개하면 이 화면에 나와요.</p>')+'</div>'}
+function qQuestions(){
+  if(!Q.questions)return '<div class="card"><p class="callout">문제를 불러오는 중이에요…</p></div>';
+  var lock=qs.pending||!!qs.submitted;
+  var cards=Q.questions.map(function(q,i){
+    var body='';
+    if(q.text)body+='<p class="qtext">'+esc(q.text)+'</p>';
+    if(q.img)body+='<img class="qimg" src="'+QAPI+'?img='+esc(q.img)+'" alt="'+(i+1)+'번 문제 그림" decoding="async">';
+    if(!q.text&&!q.img)body+='<p class="qtext" style="color:var(--muted)">큰 화면의 '+(i+1)+'번 문제를 보고 답해요.</p>';
+    if(q.type==='choice'){
+      body+='<div class="qopts" role="group" aria-label="'+(i+1)+'번 보기">'+q.choices.map(function(c,j){return '<button class="qopt" data-qc="'+i+':'+j+'" aria-pressed="'+(String(qs.ans[i])===String(j))+'"'+(lock?' disabled':'')+'><b>'+CIRC.charAt(j)+'</b><span>'+esc(c)+'</span></button>'}).join('')+'</div>';
+    }else{
+      body+='<input class="qshort" data-qa="'+i+'" value="'+esc(qs.ans[i]==null?'':qs.ans[i])+'" maxlength="50" autocomplete="off" autocapitalize="off" placeholder="답을 적어요" aria-label="'+(i+1)+'번 답"'+(lock?' disabled':'')+'>';
+    }
+    return '<div class="card qcard"><h3>'+(i+1)+'번</h3>'+body+'</div>'}).join('');
+  var bar='<div class="qspace"></div><div class="qbar"><div><span id="qcount">'+qAnswered()+' / '+Q.questions.length+' 답함</span><button class="btn primary" data-act="qsubmit"'+(lock?' disabled':'')+'>'+(qs.pending?'보내는 중…':'제출하기')+'</button></div></div>';
+  var ban=qs.pending?qPendingBox():(qs.err?'<div class="card"><p class="err" role="alert">'+esc(qErrText(qs.err))+'</p>'+(qs.err==='closed'?qBackupBtn():'')+'</div>':'');
+  return ban+cards+bar;
+}
+function qResult(){
+  var n=Q.questions.length,sc=0,rows=Q.questions.map(function(q,i){
+    var ok=qGrade(i);if(ok)sc++;var a=qs.ans[i],mine,right;
+    if(q.type==='choice'){mine=(a==null||a==='')?'(답 안 함)':CIRC.charAt(+a)+' '+(q.choices[+a]||'');right=CIRC.charAt(q.answer)+' '+(q.choices[q.answer]||'')}
+    else{mine=(a==null||a==='')?'(답 안 함)':String(a);right=(q.answer||[]).join(' / ')}
+    return '<div class="qres '+(ok?'ok':'no')+'"><i>'+(ok?'O':'X')+'</i><div>'+(i+1)+'번 · 내 답: '+esc(mine)+(ok?'':'<small>정답: '+esc(right)+'</small>')+'</div></div>'}).join('');
+  return '<div class="card"><h3>내 결과 · '+sc+' / '+n+'</h3>'+(qs.submitted?'':'<p class="callout">제출하지 않아 순위에는 들어가지 않아요.</p>')+rows+'</div>'}
+function vQuiz(){
+  var out='<div class="sec-h"><h2>퀴즈</h2><p>선생님이 시작하면 문제가 열려요. 끝까지 풀고 한 번만 제출해요.</p></div>';
+  if(!Q||!Q.id||Q.status==='off')return out+'<div class="card"><h3>지금은 퀴즈가 없어요</h3><p class="callout">퀴즈 시간이 되면 이 화면에 문제가 나와요. 선생님 안내를 기다려 주세요.</p></div>';
+  var mine=qs.id===Q.id;
+  if(mine&&qs.submitted)out+=qDone();
+  else if(Q.status==='closed')out+=(qs.pending?qPendingBox():'<div class="card"><h3>퀴즈가 마감됐어요</h3>'+(qs.err?'<p class="err">'+esc(qErrText(qs.err))+'</p>':'')+'<p class="callout">제출하지 못했다면 선생님께 알려 주세요.</p>'+qBackupBtn()+'</div>');
+  else if(!qIdOk()||!qme.ok)out+=qIdForm();
+  else if(Q.status==='ready')out+='<div class="card qdone"><span class="tag">준비 완료</span><h3>'+esc(qme.sid)+' '+esc(qme.name)+'</h3><p style="margin:0">선생님이 시작하면 문제가 바로 떠요. 이 화면에서 기다려 주세요.</p><button class="btn small" data-act="qedit">학번·이름 고치기</button></div>';
+  else out+=qQuestions();
+  if(Q.status==='closed'&&Q.reveal&&Q.questions&&Q.questions[0]&&Q.questions[0].answer!=null)out+=qResult();
+  return out;
+}
+
+/* ---------- 퀴즈 (선생님) ---------- */
+var qa={loaded:false,loading:false,failed:false,state:null,draft:null,busy:false,msg:'',count:null,results:null,timer:0};
+function qapi(body){body.password=adminPw;return api(body,QAPI)}
+function qToDraft(def){return{title:def.title||'',questions:def.questions.map(function(q){return{type:q.type,text:q.text||'',img:q.img||'',choices:(q.choices||[]).slice(),answer:q.type==='choice'?q.answer:0,ans:q.type==='short'?(q.answer||[]).join(', '):''}})}}
+function qBlank(){return{type:'choice',text:'',img:'',choices:['','','',''],answer:0,ans:''}}
+/* "기본 문제 불러오기"로 채우는 학교 상식 5문제 (불러온 뒤 "퀴즈 저장"을 눌러야 반영) */
+var QUIZ_SAMPLE={title:'한우물제 학교 상식 퀴즈',questions:[
+  {type:'choice',text:'우리나라 중학교는 몇 년 동안 다닐까요?',img:'',choices:['2년','3년','4년','6년'],answer:1,ans:''},
+  {type:'short',text:'한글(훈민정음)을 만든 조선의 왕은 누구일까요?',img:'',choices:[],answer:0,ans:'세종대왕, 세종, 세종대왕님'},
+  {type:'choice',text:'학교에 불이 났을 때 대피 방법으로 옳은 것은?',img:'',choices:['엘리베이터로 빨리 내려간다','젖은 수건으로 코와 입을 막고 낮은 자세로 계단을 이용한다','가방과 소지품을 모두 챙겨서 나간다','교실 문을 잠그고 창문 쪽에서 기다린다'],answer:1,ans:''},
+  {type:'short',text:'물의 화학식을 영어와 숫자로 적어 보세요.',img:'',choices:[],answer:0,ans:'H2O'},
+  {type:'choice',text:'삼각형의 세 내각의 크기를 모두 더하면 몇 도일까요?',img:'',choices:['90°','180°','270°','360°'],answer:1,ans:''}]};
+function qaReset(){qa.loaded=false;qa.failed=false;qa.msg='';qa.results=null}
+function qaLoad(){
+  qa.loading=true;
+  qapi({action:'qget'}).then(function(r){qa.loading=false;
+    if(r.ok){qa.loaded=true;qa.failed=false;qa.state=r.state;qa.draft=r.def?qToDraft(r.def):{title:'',questions:[]};qaTimer()}else{qa.failed=true;qa.msg=errText(r.error)}
+    if(mode==='edit')render();
+  }).catch(function(){qa.loading=false;qa.failed=true;qa.msg=errText('network');if(mode==='edit')render()});
+}
+function qaTimer(){ // 진행 중에는 제출 수를 5초마다 확인
+  if(qa.timer)return;
+  qa.timer=setInterval(function(){
+    if(mode!=='edit'||document.hidden||!qa.state||(qa.state.status!=='open'&&qa.state.status!=='closed'))return;
+    qapi({action:'qcount'}).then(function(r){if(r.ok){qa.count=r.n;var e=document.getElementById('qcount-a');if(e)e.textContent=r.n}}).catch(function(){});
+  },5000);
+}
+function qaDef(){var d=qa.draft;return{title:d.title,questions:d.questions.map(function(q){
+  var o={type:q.type,text:q.text,img:q.img||''};
+  if(q.type==='choice'){o.choices=q.choices;o.answer=q.answer}else o.answer=String(q.ans||'').split(/[,\n]/).map(function(s){return s.trim()}).filter(Boolean);
+  return o})}}
+function qaSave(){
+  if(qa.busy)return;var d=qa.draft;
+  if(!d.questions.length){qa.msg='문제를 하나 이상 만들어 주세요.';render();return}
+  for(var i=0;i<d.questions.length;i++){var q=d.questions[i];
+    if(q.type==='short'&&!String(q.ans||'').replace(/[,\s]/g,'')){qa.msg=(i+1)+'번 문제의 인정하는 답을 적어 주세요.';render();return}
+  }
+  qa.busy=true;qa.msg='저장 중…';render();
+  qapi({action:'qsave',def:qaDef()}).then(function(r){qa.busy=false;qa.msg=r.ok?'퀴즈를 저장했어요.':errText(r.error);render()}).catch(function(){qa.busy=false;qa.msg=errText('network');render()});
+}
+function qaStatus(body,ask){
+  if(qa.busy)return;if(ask&&!confirm(ask))return;
+  qa.busy=true;qa.msg='처리 중…';render();
+  qapi(body).then(function(r){qa.busy=false;
+    if(r.ok){qa.state=r.state;if(body.action==='qnew'){qa.results=null;qa.count=0}qa.msg='반영했어요. 학생 화면에는 몇 초 안에 반영돼요.'}else qa.msg=errText(r.error);
+    render()}).catch(function(){qa.busy=false;qa.msg=errText('network');render()});
+}
+function qResize(file){return new Promise(function(res,rej){
+  var u=URL.createObjectURL(file),im=new Image();
+  im.onload=function(){URL.revokeObjectURL(u);var s=Math.min(1,1080/Math.max(im.width,im.height)),qu=.8,out='';
+    for(var n=0;n<8;n++){var c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*s));c.height=Math.max(1,Math.round(im.height*s));
+      var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);
+      out=c.toDataURL('image/jpeg',qu);if(out.length*.75<=300000)break;if(qu>.5)qu-=.1;else s*=.8}
+    res(out)};
+  im.onerror=function(){URL.revokeObjectURL(u);rej(new Error('img'))};im.src=u})}
+function qaImg(i,file){
+  qa.msg='그림을 줄여서 올리는 중…';render();
+  qResize(file).then(function(url){return qapi({action:'qimg',data:url})}).then(function(r){
+    if(r.ok){qa.draft.questions[i].img=r.key;qa.msg='그림을 올렸어요. 아래 "퀴즈 저장"을 눌러야 반영돼요.'}else qa.msg=errText(r.error);render();
+  }).catch(function(){qa.msg='그림을 올리지 못했어요. 다른 사진으로 해 보세요.';render()});
+}
+function qaResults(){
+  qa.msg='결과를 불러오는 중…';render();
+  qapi({action:'qresults'}).then(function(r){if(r.ok){qa.results=r;qa.msg=''}else qa.msg=errText(r.error);render()}).catch(function(){qa.msg=errText('network');render()});
+}
+function csvCell(c){c=String(c);if(/^[=+\-@]/.test(c))c="'"+c;return '"'+c.replace(/"/g,'""')+'"'}
+function qaCsv(){
+  var rows=[['순위','학번','이름','점수','걸린시간(초)','휴대폰측정(초)','재시도','접수번호','제출시각']];
+  qa.results.rows.forEach(function(r,i){rows.push([i+1,r.sid,r.name,r.score,(r.el/1000).toFixed(1),(r.ce/1000).toFixed(1),r.tries,r.code,new Date(r.t).toLocaleString('ko-KR')])});
+  var csv='﻿'+rows.map(function(r){return r.map(csvCell).join(',')}).join('\r\n');
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='quiz-results.csv';document.body.appendChild(a);a.click();a.remove();
+}
+function quizCard(){
+  if(!qa.loaded){
+    if(!qa.loading&&!qa.failed)qaLoad();
+    return '<div class="card"><h3>퀴즈</h3><p class="callout">'+(qa.failed?esc(qa.msg||'불러오지 못했어요.'):'불러오는 중…')+'</p>'+(qa.failed?'<button class="btn small" data-act="qaretry">다시 불러오기</button>':'')+'</div>';
+  }
+  var st=qa.state,s=st.status,has=!!st.id,d=qa.draft,locked=(s==='open'||s==='closed');
+  var label={off:'숨김',ready:'대기 중 (학생이 학번을 입력하는 단계)',open:'진행 중',closed:'마감'}[s];
+  var ctl='';
+  if(!has||s==='off')ctl+='<button class="btn primary" data-act="qanew">새 회차 만들고 대기 열기</button>';
+  if(has&&s==='off')ctl+='<button class="btn" data-act="qaready">대기 다시 열기</button>';
+  if(s==='ready')ctl+='<button class="btn primary" data-act="qaopen">▶ 시작</button><button class="btn" data-act="qaoff">퀴즈 숨기기</button>';
+  if(s==='open')ctl+='<button class="btn primary" data-act="qaclose">■ 마감</button>';
+  if(s==='closed')ctl+='<button class="btn primary" data-act="qareveal">'+(st.reveal?'결과 숨기기':'결과 공개')+'</button><button class="btn" data-act="qareopen">다시 열기</button><button class="btn" data-act="qanew">새 회차</button><button class="btn" data-act="qaoff">퀴즈 숨기기</button>';
+  var qh=d.questions.map(function(q,i){
+    var im=q.img?'<div><img src="'+QAPI+'?img='+esc(q.img)+'" alt=""></div><button class="btn small" data-qdimgdel="'+i+'"'+(locked?' disabled':'')+'>그림 빼기</button>':'<input type="file" accept="image/*" data-qimg="'+i+'" aria-label="그림 고르기"'+(locked?' disabled':'')+'>';
+    var opt;
+    if(q.type==='choice'){
+      opt=q.choices.map(function(c,j){return '<div style="display:flex;gap:6px;align-items:center"><button class="chipbtn" data-qok="'+i+':'+j+'" aria-pressed="'+(q.answer===j)+'" aria-label="'+(j+1)+'번 보기를 정답으로"'+(locked?' disabled':'')+'>'+CIRC.charAt(j)+(q.answer===j?' 정답':'')+'</button><input data-qch="'+i+':'+j+'" value="'+esc(c)+'" placeholder="보기 글 (비워도 돼요)" style="flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 10px"'+(locked?' disabled':'')+'><button class="btn small" data-qchdel="'+i+':'+j+'"'+(locked||q.choices.length<=2?' disabled':'')+'>×</button></div>'}).join('')+
+        '<div><button class="btn small" data-qchadd="'+i+'"'+(locked||q.choices.length>=5?' disabled':'')+'>보기 추가</button></div>';
+    }else opt='<div class="field"><label for="qa-a'+i+'">인정하는 답 (쉼표로 여러 개)</label><input id="qa-a'+i+'" data-qd="'+i+'" data-k="ans" value="'+esc(q.ans)+'"'+(locked?' disabled':'')+'></div>';
+    return '<div class="qedit"><div class="ops" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><b>'+(i+1)+'번</b><select data-qtype="'+i+'" aria-label="'+(i+1)+'번 종류"'+(locked?' disabled':'')+'><option value="choice"'+(q.type==='choice'?' selected':'')+'>객관식</option><option value="short"'+(q.type==='short'?' selected':'')+'>단답형</option></select><span class="sp" style="flex:1"></span>'+
+      '<button class="btn small" data-qdmv="'+i+':-1"'+(locked||i===0?' disabled':'')+'>위로</button><button class="btn small" data-qdmv="'+i+':1"'+(locked||i===d.questions.length-1?' disabled':'')+'>아래로</button><button class="btn small" data-qddel="'+i+'"'+(locked?' disabled':'')+'>삭제</button></div>'+
+      '<div class="field"><label for="qa-t'+i+'">문제 글 (비우면 학생 휴대폰에는 번호와 답안칸만 나와요)</label><textarea id="qa-t'+i+'" data-qd="'+i+'" data-k="text" style="min-height:80px"'+(locked?' disabled':'')+'>'+esc(q.text)+'</textarea></div>'+im+opt+'</div>'}).join('');
+  var res='';
+  if(qa.results){var R=qa.results;
+    res='<p class="callout">제출 '+R.total+'명 · 문제 '+R.n+'개 · 점수가 높고 걸린 시간이 짧은 순</p><div class="qtable"><table><thead><tr><th>순위</th><th>학번</th><th>이름</th><th>점수</th><th>걸린 시간</th><th>폰 측정</th><th>재시도</th><th>접수번호</th></tr></thead><tbody>'+
+      R.rows.slice(0,30).map(function(r,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(r.sid)+'</td><td>'+esc(r.name)+'</td><td>'+r.score+'</td><td>'+(r.el/1000).toFixed(1)+'초</td><td>'+(r.ce/1000).toFixed(1)+'초</td><td>'+r.tries+'</td><td class="mono">'+esc(r.code)+'</td></tr>'}).join('')+'</tbody></table></div>'+
+      (R.rows.length>30?'<p class="callout">상위 30명만 보여요. 전체는 CSV로 내려받아요.</p>':'')+
+      (R.dups&&R.dups.length?'<p class="callout">같은 학번으로 다시 제출하려던 기록 '+R.dups.length+'건: '+R.dups.slice(0,10).map(function(x){return esc(x.sid)+' '+esc(x.name)}).join(', ')+'</p>':'')+
+      '<div><button class="btn" data-act="qacsv">CSV 내려받기</button></div>';
+  }
+  return '<div class="card"><h3>퀴즈</h3>'+
+    '<p class="callout">현재 상태: <b>'+label+'</b>'+(s==='open'||s==='closed'?' · 제출 <b id="qcount-a">'+(qa.count==null?'…':qa.count)+'</b>명':'')+'</p>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+ctl+'</div>'+
+    '<p class="callout">흐름: 새 회차(대기) → 학생이 학번 입력 → ▶ 시작 → ■ 마감(마감 뒤 2분까지는 늦게 도착한 제출도 받아요) → 결과 공개. 이 카드는 아래 "저장"과 상관없이 바로 반영돼요.</p>'+
+    (qa.msg?'<p class="callout" role="status">'+esc(qa.msg)+'</p>':'')+
+    '<h3 style="margin-top:6px">문제 만들기'+(locked?' <span style="font-weight:400;color:var(--muted);font-size:14px">(진행·마감 중에는 고칠 수 없어요. 새 회차를 만들면 고칠 수 있어요)</span>':'')+'</h3>'+
+    '<div class="field"><label for="qa-title">퀴즈 제목 (선택)</label><input id="qa-title" data-qt="1" maxlength="60" value="'+esc(d.title)+'"'+(locked?' disabled':'')+'></div>'+
+    '<div class="erows">'+qh+'</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-act="qdadd"'+(locked||d.questions.length>=30?' disabled':'')+'>문제 추가</button><button class="btn" data-act="qasample"'+(locked?' disabled':'')+'>기본 문제 5개 불러오기</button><button class="btn primary" data-act="qasave"'+(locked||qa.busy?' disabled':'')+'>퀴즈 저장</button></div>'+
+    '<p class="callout">객관식은 보기 2~5개, 단답형은 인정하는 답을 쉼표로 여러 개 적을 수 있어요. 띄어쓰기·대소문자·문장부호 차이는 무시하고 채점해요. 그림은 휴대폰에서 자동으로 줄여서 올려요(문제 그림은 합쳐서 1MB 이하 권장).</p>'+
+    '<h3 style="margin-top:6px">결과</h3><div><button class="btn" data-act="qaresults">결과 불러오기</button></div>'+res+'</div>';
+}
+
 /* ---------- login ---------- */
 function renderLogin(){
   app.innerHTML='<div class="wrap plain"><div class="card login"><h3>선생님 수정</h3>'+
@@ -525,8 +782,8 @@ function renderLogin(){
    '</div></div>';
   var pw=document.getElementById('pw');if(pw)pw.focus();
 }
-function api(body){return fetch(SAVE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().catch(function(){return{ok:false,error:'http_'+r.status}})})}
-function errText(e){return{wrong_password:'비밀번호가 맞지 않아요.',not_configured:'버셀 환경 변수(ADMIN_PASSWORD, GITHUB_TOKEN, GITHUB_REPO)가 아직 설정되지 않았어요.',too_large:'내용이 너무 길어 저장하지 못했어요.',conflict:'다른 선생님이 동시에 저장했어요. 잠시 뒤 다시 저장해 주세요.',bad_data:'저장할 내용에 빠진 항목이 있어요.',bad_text:'공지 내용은 1~200자로 적어 주세요.',network:'인터넷 연결을 확인하고 다시 시도해 주세요.',http_404:'저장 기능은 버셀에 배포한 사이트에서만 쓸 수 있어요.'}[e]||('저장하지 못했어요('+e+'). 잠시 뒤 다시 시도해 주세요.')}
+function api(body,url){return fetch(url||SAVE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().catch(function(){return{ok:false,error:'http_'+r.status}})})}
+function errText(e){return{wrong_password:'비밀번호가 맞지 않아요.',not_configured:'버셀 환경 변수(ADMIN_PASSWORD, GITHUB_TOKEN, GITHUB_REPO)가 아직 설정되지 않았어요.',too_large:'내용이 너무 길어 저장하지 못했어요.',conflict:'다른 선생님이 동시에 저장했어요. 잠시 뒤 다시 저장해 주세요.',bad_data:'저장할 내용에 빠진 항목이 있어요.',bad_text:'공지 내용은 1~200자로 적어 주세요.',network:'인터넷 연결을 확인하고 다시 시도해 주세요.',quiz_open:'진행·마감 중에는 문제를 고칠 수 없어요. 새 회차를 만든 뒤 고쳐 주세요.',bad_quiz:'문제에 빠진 곳이 있어요. 객관식은 보기 2~5개, 단답형은 인정하는 답이 필요해요.',bad_image:'그림을 올리지 못했어요. 다른 사진으로 해 보세요.',no_quiz:'먼저 문제를 저장해 주세요.',redis:'퀴즈 저장소에 연결하지 못했어요. 버셀에 Upstash Redis가 연결됐는지 확인하고 잠시 뒤 다시 시도해 주세요.',http_404:'저장 기능은 버셀에 배포한 사이트에서만 쓸 수 있어요.'}[e]||('저장하지 못했어요('+e+'). 잠시 뒤 다시 시도해 주세요.')}
 
 /* ---------- editor ---------- */
 function renderEditor(){
@@ -548,8 +805,8 @@ function renderEditor(){
   function ta(key,label){return'<div class="field"><label for="t-'+key+'">'+label+' (한 줄에 하나씩)</label><textarea id="t-'+key+'" data-l="'+key+'">'+esc((d[key]||[]).join('\n'))+'</textarea></div>'}
   app.innerHTML='<div class="wrap plain"><div class="editor">'+
    '<div class="sec-h"><h2>식순·안내 수정</h2><p>맨 위 공지는 바로 보내져요. 아래 내용은 저장하면 사이트가 새로 배포되고(약 1분), 학생 화면에는 그 뒤 3분 안에 반영돼요.</p></div>'+
-   annCard()+
-   '<div class="card"><h3>기본 정보</h3><div class="grid2">'+f('s-date','행사 날짜',d.date,'date')+f('s-venue','장소',d.venue)+f('s-start','공연 시작',d.start,'time')+f('s-morningTime','아침 집결 시각',d.morningTime,'time')+f('s-morningPlace','아침 집결 장소',d.morningPlace)+f('s-meetTime','퇴장 집결 시각 (체험 종료)',d.meetTime,'time')+f('s-meetPlace','퇴장 집결 장소',d.meetPlace)+f('s-homeNote','귀가 방법',d.homeNote)+'</div></div>'+
+   annCard()+quizCard()+
+   '<div class="card"><h3>기본 정보</h3><div class="grid2">'+f('s-date','행사 날짜',d.date,'date')+f('s-venue','장소',d.venue)+f('s-start','공연 시작',d.start,'time')+f('s-morningTime','아침 집결 시각',d.morningTime,'time')+f('s-morningPlace','아침 집결 장소',d.morningPlace)+f('s-meetTime','퇴장 집결 시각 (체험 종료)',d.meetTime,'time')+f('s-meetPlace','퇴장 집결 장소',d.meetPlace)+f('s-homeNote','귀가 방법',d.homeNote)+f('s-quizBackup','퀴즈 예비 제출 주소 (구글 설문 링크, 선택)',d.quizBackup||'')+'</div></div>'+
    '<div class="card"><h3>비상 연락처</h3><div class="erows">'+crow+'</div><button class="btn" data-act="cadd">연락처 추가</button></div>'+
    '<div class="card"><h3>지도 위치 표시</h3><p class="callout">"지도에서 위치 찍기"를 누른 뒤 아래 지도에서 그 장소를 누르면 번호가 표시돼요.</p><div class="erows">'+prow+'</div><button class="btn" data-act="madd">위치 추가</button>'+mapBlock(d.pins,{placing:placing>-1})+'</div>'+
    '<div class="card"><h3>식순 <span class="mono" style="font-weight:400;color:var(--muted);font-size:14px">'+d.program.length+'개</span></h3><div class="erows">'+rows+'</div><button class="btn" data-ins="'+d.program.length+'">순서 추가</button>'+
@@ -666,8 +923,8 @@ function load(){
     online=!x.c;if(online)lastSync=Date.now(); // 서비스 워커가 저장본을 준 경우는 오프라인으로 표시
     var changed=r&&valid(r.data)&&String(r.updated||'')>String(updatedAt||'');
     if(changed){S=merge(r.data);updatedAt=r.updated;try{localStorage.setItem(CACHE,JSON.stringify({data:S,updated:updatedAt}))}catch(e){}}
-    if(mode==='view'&&(changed||wasOn!==online||tab!=='map'))render();
-  }).catch(function(){clearTimeout(timer);loading=false;if(online){online=false;if(mode==='view'&&tab!=='map')render()}});
+    if(mode==='view'&&(changed||wasOn!==online||(tab!=='map'&&tab!=='quiz')))render();
+  }).catch(function(){clearTimeout(timer);loading=false;if(online){online=false;if(mode==='view'&&tab!=='map'&&tab!=='quiz')render()}});
 }
 
 /* ---------- events ---------- */
@@ -678,7 +935,41 @@ app.addEventListener('click',function(ev){
     var r=inner.getBoundingClientRect();draft.pins[placing].x=+((ev.clientX-r.left)/r.width*100).toFixed(2);draft.pins[placing].y=+((ev.clientY-r.top)/r.height*100).toFixed(2);
     placing=-1;render();return}
   var b=ev.target.closest('button');if(!b)return;
-  if(b.dataset.tab){tab=b.dataset.tab;try{history.replaceState(null,'','#'+tab)}catch(e){}render();window.scrollTo({top:0});return}
+  if(b.dataset.tab){tab=b.dataset.tab;try{history.replaceState(null,'','#'+tab)}catch(e){}render();window.scrollTo({top:0});if(tab==='quiz')qLoad();return}
+  /* 퀴즈: 학생 */
+  if(b.dataset.qc!=null){if(qs.pending||qs.submitted)return;var qc=b.dataset.qc.split(':');qs.ans[+qc[0]]=qc[1];lsSet(LSQ,qs);
+    var sib=b.parentNode.children;for(var si=0;si<sib.length;si++)sib[si].setAttribute('aria-pressed',sib[si]===b?'true':'false');qCount();return}
+  if(b.dataset.act==='qready'){
+    if(!SID_RE.test(qme.sid||'')){qMsg='학번은 숫자 5자리예요.';render();return}
+    if(!String(qme.name||'').trim()){qMsg='이름을 적어 주세요.';render();return}
+    qMsg='';qme.name=String(qme.name).trim();qme.ok=true;lsSet(LSQME,qme);render();return}
+  if(b.dataset.act==='qedit'){qme.ok=false;render();return}
+  if(b.dataset.act==='qsubmit'){if(!Q||!Q.questions)return;var left=Q.questions.length-qAnswered();
+    if(!confirm((left?'아직 답하지 않은 문제가 '+left+'개 있어요. ':'')+'제출하면 고칠 수 없어요. 제출할까요?'))return;qSubmit();return}
+  /* 퀴즈: 선생님 */
+  if(b.dataset.act==='qaretry'){qa.failed=false;qa.msg='';render();return}
+  if(mode==='edit'&&qa.loaded){
+    var qd=qa.draft,qp;
+    if(b.dataset.qdmv!=null){qp=b.dataset.qdmv.split(':');var q1=+qp[0],q2=q1+(+qp[1]),qx=qd.questions[q1];qd.questions[q1]=qd.questions[q2];qd.questions[q2]=qx;render();return}
+    if(b.dataset.qddel!=null){qd.questions.splice(+b.dataset.qddel,1);render();return}
+    if(b.dataset.qok!=null){qp=b.dataset.qok.split(':');qd.questions[+qp[0]].answer=+qp[1];render();return}
+    if(b.dataset.qchadd!=null){var qq=qd.questions[+b.dataset.qchadd];if(qq.choices.length<5)qq.choices.push('');render();return}
+    if(b.dataset.qchdel!=null){qp=b.dataset.qchdel.split(':');var qr=qd.questions[+qp[0]];if(qr.choices.length>2){qr.choices.splice(+qp[1],1);if(qr.answer>=qr.choices.length)qr.answer=0;else if(qr.answer>+qp[1])qr.answer--}render();return}
+    if(b.dataset.qdimgdel!=null){qd.questions[+b.dataset.qdimgdel].img='';render();return}
+    var qa2=b.dataset.act;
+    if(qa2==='qdadd'){qd.questions.push(qBlank());render();return}
+    if(qa2==='qasample'){if(qd.questions.length&&!confirm('지금 만든 문제를 기본 문제 5개로 바꿀까요?'))return;qa.draft=JSON.parse(JSON.stringify(QUIZ_SAMPLE));qa.msg='기본 문제를 불러왔어요. 확인한 뒤 "퀴즈 저장"을 눌러 주세요.';render();return}
+    if(qa2==='qasave'){qaSave();return}
+    if(qa2==='qanew'){qaStatus({action:'qnew'},qa.state.id?'새 회차를 만들어요. 학생 화면은 학번 입력 단계로 돌아가고, 이전 회차 기록은 서버에 남아요. 계속할까요?':'');return}
+    if(qa2==='qaready'){qaStatus({action:'qstatus',status:'ready'});return}
+    if(qa2==='qaopen'){qaStatus({action:'qstatus',status:'open'},'지금 퀴즈를 시작할까요? 학생 화면에 문제가 바로 떠요.');return}
+    if(qa2==='qaclose'){qaStatus({action:'qstatus',status:'closed'},'퀴즈를 마감할까요? (마감 뒤 2분까지는 늦게 도착한 제출도 받아요)');return}
+    if(qa2==='qareopen'){qaStatus({action:'qstatus',status:'open'},'마감한 퀴즈를 다시 열까요?');return}
+    if(qa2==='qaoff'){qaStatus({action:'qstatus',status:'off'},'학생 화면에서 퀴즈를 숨길까요?');return}
+    if(qa2==='qareveal'){qaStatus({action:'qstatus',reveal:!qa.state.reveal},qa.state.reveal?'':'점수와 정답을 학생에게 공개할까요?');return}
+    if(qa2==='qaresults'){qaResults();return}
+    if(qa2==='qacsv'){if(qa.results)qaCsv();return}
+  }
   if(b.dataset.filter){filter=b.dataset.filter;render();return}
   if(b.dataset.zoom){setZoom(zoom*(+b.dataset.zoom>0?1.5:1/1.5));return}
   if(b.dataset.pin!=null&&mode==='view'){var i=+b.dataset.pin;selPin=(selPin===i&&b.classList.contains('pin'))?-1:i;var y2=window.scrollY;render();window.scrollTo(0,y2);
@@ -696,7 +987,7 @@ app.addEventListener('click',function(ev){
   if(a==='mapretry'){mapOk=null;zoom=null;render();return}
   if(a==='mapfull'){mapFull=!mapFull;zoom=null;var yf=window.scrollY;render();if(!mapFull)window.scrollTo(0,yf);return}
   if(a==='login'||a==='cancel')mapFull=false;
-  if(a==='login'){loginErr='';mode=adminPw?'edit':'login';if(mode==='edit'){draft=JSON.parse(JSON.stringify(S))}render();window.scrollTo({top:0});return}
+  if(a==='login'){loginErr='';mode=adminPw?'edit':'login';if(mode==='edit'){draft=JSON.parse(JSON.stringify(S));qaReset()}render();window.scrollTo({top:0});return}
   if(a==='cancel'){mode='view';draft=null;placing=-1;loginErr='';if(typeof needReload!=='undefined'&&needReload){freshReload();return}render();load();return}
   if(a==='save'){save();return}
   if(a==='cadd'){draft.contacts.push({role:'',name:'',phone:''});render();return}
@@ -714,11 +1005,18 @@ app.addEventListener('submit',function(ev){
   if(ev.target.id!=='loginform')return;ev.preventDefault();
   var pw=document.getElementById('pw').value;busy=true;loginErr='';render();
   api({action:'check',password:pw}).then(function(r){busy=false;
-    if(r.ok){adminPw=pw;draft=JSON.parse(JSON.stringify(S));mode='edit'}else loginErr=errText(r.error);render();
+    if(r.ok){adminPw=pw;draft=JSON.parse(JSON.stringify(S));qaReset();mode='edit'}else loginErr=errText(r.error);render();
   }).catch(function(){busy=false;loginErr='서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.';render()});
 });
 app.addEventListener('input',function(ev){
-  var e=ev.target;if(!draft)return;
+  var e=ev.target;
+  /* 퀴즈 답은 입력하는 대로 휴대폰에 저장 (다시 그리지 않아서 입력 중에 글자가 끊기지 않음) */
+  if(e.dataset.qme){if(e.dataset.qme==='sid'){e.value=e.value.replace(/\D/g,'').slice(0,5)}qme[e.dataset.qme]=e.value;lsSet(LSQME,qme);return}
+  if(e.dataset.qa!=null){if(qs.pending||qs.submitted)return;qs.ans[+e.dataset.qa]=e.value;lsSet(LSQ,qs);qCount();return}
+  if(!draft)return;
+  if(e.dataset.qt){qa.draft.title=e.value;return}
+  if(e.dataset.qd!=null){qa.draft.questions[+e.dataset.qd][e.dataset.k]=e.value;return}
+  if(e.dataset.qch!=null){var qpp=e.dataset.qch.split(':');qa.draft.questions[+qpp[0]].choices[+qpp[1]]=e.value;return}
   if(e.dataset.ann!=null)annDraft.text=e.value;
   else if(e.dataset.p!=null){var p=draft.program[+e.dataset.p];p[e.dataset.k]=e.value}
   else if(e.dataset.c!=null)draft.contacts[+e.dataset.c][e.dataset.k]=e.value;
@@ -727,6 +1025,8 @@ app.addEventListener('input',function(ev){
   else if(e.dataset.l)draft[e.dataset.l]=e.value.split('\n').map(function(s){return s.trim()}).filter(Boolean);
 });
 app.addEventListener('change',function(ev){var e=ev.target;
+  if(e.dataset.qimg!=null&&e.files&&e.files[0]&&qa.loaded){qaImg(+e.dataset.qimg,e.files[0]);return}
+  if(e.dataset.qtype!=null&&qa.loaded){qa.draft.questions[+e.dataset.qtype].type=e.value;render();return}
   if(e.dataset.chk!=null){checks[e.dataset.chk]=e.checked;try{localStorage.setItem(LSCHK,JSON.stringify(checks))}catch(x){}}
   if(e.dataset.m!=null&&e.dataset.k==='kind'&&draft)render();});
 
@@ -735,24 +1035,31 @@ showMorn();
 /* 350명이 같은 순간에 요청하지 않도록 첫 확인과 주기 확인을 사람마다 조금씩 어긋나게 */
 setTimeout(load,Math.random()*1500);
 setTimeout(loadAnn,300+Math.random()*1500);
-setInterval(function(){if(mode==='view'&&tab!=='map'&&!document.hidden)render();applyAnn();if(!mornActive())hideMorn()},30000);
+setInterval(function(){if(mode==='view'&&tab!=='map'&&tab!=='quiz'&&!document.hidden)render();applyAnn();if(!mornActive())hideMorn()},30000);
 /* 공지는 아주 작은 파일이라 1분(±25%)마다 확인. 화면이 꺼져 있으면 건너뜀 */
 (function pollA(){setTimeout(function(){if(!document.hidden)loadAnn();pollA()},ANN_MS*(0.75+Math.random()*0.5))})();
 (function poll(){setTimeout(function(){if(!document.hidden)load();poll()},POLL_MS*(0.75+Math.random()*0.5))})();
+/* 퀴즈: 보고 있을 때만 상태 확인 (대기 3초 · 진행 15초 · 마감 20초 · 숨김 30초, 사람마다 어긋나게). 제출 못 한 답은 다시 보냄 */
+var qPollT=0;
+function qSched(){clearTimeout(qPollT);qPollT=setTimeout(function(){if(tab==='quiz'&&mode==='view'&&!document.hidden)qLoad();qSched()},qDelay())} // 상태를 새로 받을 때마다 그 상태에 맞는 간격으로 다시 걺
+qSched();
+function qResume(){if(qs.pending&&!qs.submitted&&!qFlight)qSubmit()}
+if(tab==='quiz')setTimeout(qLoad,Math.random()*1000);
+if(qs.pending&&!qs.submitted)setTimeout(qResume,500+Math.random()*1500);
 var lastVis=0;
-document.addEventListener('visibilitychange',function(){if(!document.hidden){loadAnn();if(Date.now()-lastVis>30000){lastVis=Date.now();load()}}});
-window.addEventListener('online',function(){load();loadAnn()});
-window.addEventListener('offline',function(){online=false;if(mode==='view'&&tab!=='map')render()});
+document.addEventListener('visibilitychange',function(){if(!document.hidden){loadAnn();if(tab==='quiz'&&mode==='view')qLoad();qResume();if(Date.now()-lastVis>30000){lastVis=Date.now();load()}}});
+window.addEventListener('online',function(){load();loadAnn();qResume()});
+window.addEventListener('offline',function(){online=false;if(mode==='view'&&tab!=='map'&&tab!=='quiz')render()});
 /* 오프라인 저장: 한 번 열면 다음부터는 통신이 안 돼도 열려요 */
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
   /* 새 화면이 배포되면 다시 접속만 해도 바뀌도록: 새 버전을 받으면 한 번 새로고침
      (선생님 수정 화면에서 편집 중이면 작성 내용이 날아가지 않게 수정 화면을 나갈 때까지 미룸) */
   var hadSW=!!navigator.serviceWorker.controller,reloading=false,needReload=false;
-  function freshReload(){if(reloading)return;if(mode==='edit'){needReload=true;return}reloading=true;location.reload()}
+  function freshReload(){if(reloading)return;if(mode==='edit'||qBusy()||qFlight||qs.pending){needReload=true;return}reloading=true;location.reload()} // 수정·퀴즈 푸는 중에는 끝날 때까지 미룸
   navigator.serviceWorker.addEventListener('controllerchange',function(){if(hadSW)freshReload();hadSW=true});
   navigator.serviceWorker.addEventListener('message',function(e){if(e.data&&e.data.type==='page-updated')freshReload()});
   window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(reg){
-    document.addEventListener('visibilitychange',function(){if(document.hidden)return;if(needReload&&mode!=='edit'){freshReload();return}reg.update().catch(function(){})});
+    document.addEventListener('visibilitychange',function(){if(document.hidden)return;if(needReload&&mode!=='edit'&&!qBusy()){freshReload();return}reg.update().catch(function(){})});
   }).catch(function(){})});
 }
 })();
