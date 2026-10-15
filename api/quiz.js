@@ -43,8 +43,35 @@ async function pipe(cmds) {
 }
 const jparse = (s, d) => { try { return s ? JSON.parse(s) : d; } catch (e) { return d; } };
 
-const K = { def: 'hq:def', state: 'hq:state', img: (k) => 'hq:img:' + k, sub: (id) => 'hq:sub:' + id, dup: (id) => 'hq:dup:' + id };
+const K = { def: 'hq:def', state: 'hq:state', pub: 'hq:pub', img: (k) => 'hq:img:' + k, sub: (id) => 'hq:sub:' + id, dup: (id) => 'hq:dup:' + id };
 const EMPTY_STATE = { id: '', status: 'off', reveal: false, openedAt: 0, closedAt: 0 };
+
+/* 함수 인스턴스 안의 1초 기억: CDN 캐시가 어떤 이유로 안 먹어도 Redis에는 인스턴스당 1초에 한 번만 물어봄 */
+const MEMO_MS = 1000;
+let memoPub = { at: 0, v: null }, memoSD = { at: 0, v: null };
+function forget() { memoPub = { at: 0, v: null }; memoSD = { at: 0, v: null }; }
+async function getSD() { // [state, def]
+  if (memoSD.v && Date.now() - memoSD.at < MEMO_MS) return memoSD.v;
+  const [st, df] = await pipe([['GET', K.state], ['GET', K.def]]);
+  const v = [Object.assign({}, EMPTY_STATE, jparse(st, {})), jparse(df, null)];
+  memoSD = { at: Date.now(), v };
+  return v;
+}
+/* 학생 화면용 응답은 선생님이 바꿀 때 미리 만들어 hq:pub 하나에 저장 → 학생 요청 1번 = Redis 명령 1개 */
+async function getPub() {
+  if (memoPub.v && Date.now() - memoPub.at < MEMO_MS) return memoPub.v;
+  const [p] = await pipe([['GET', K.pub]]);
+  let v = jparse(p, null);
+  if (!v) { const [state, def] = await getSD(); v = publicQuiz(state, def); await pipe([['SET', K.pub, JSON.stringify(v)]]); }
+  memoPub = { at: Date.now(), v };
+  return v;
+}
+async function writeState(state, def, saveDef) { // 상태·문제를 바꿀 때마다 학생용 응답도 같이 갱신
+  const cmds = [['SET', K.state, JSON.stringify(state)], ['SET', K.pub, JSON.stringify(publicQuiz(state, def))]];
+  if (saveDef) cmds.push(['SET', K.def, JSON.stringify(def)]);
+  await pipe(cmds);
+  forget();
+}
 
 /* 단답형 비교: 전각/반각·대소문자·공백·문장부호 차이를 무시 (index.html의 qNorm과 똑같이 유지) */
 function norm(s) {
@@ -121,11 +148,10 @@ module.exports = async function handler(req, res) {
         res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
         return res.status(200).send(Buffer.from(b64, 'base64'));
       }
-      const [st, df] = await pipe([['GET', K.state], ['GET', K.def]]);
-      const state = Object.assign({}, EMPTY_STATE, jparse(st, {}));
-      res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
-      res.setHeader('Vercel-CDN-Cache-Control', 'max-age=2, stale-if-error=600');
-      return res.status(200).json(publicQuiz(state, jparse(df, null)));
+      const pub = await getPub();
+      res.setHeader('Cache-Control', 'public, max-age=1'); // 브라우저는 1초만 기억
+      res.setHeader('Vercel-CDN-Cache-Control', 'max-age=2, stale-if-error=600'); // 버셀 CDN은 2초, 서버 오류 때는 10분까지 마지막 정상 응답
+      return res.status(200).json(pub);
     }
 
     res.setHeader('Cache-Control', 'no-store');
@@ -144,9 +170,7 @@ module.exports = async function handler(req, res) {
       const nonce = String(body.nonce || '').slice(0, 40);
 
       const id = String(body.quizId || '');
-      const [st, df] = await pipe([['GET', K.state], ['GET', K.def]]);
-      const state = Object.assign({}, EMPTY_STATE, jparse(st, {}));
-      const def = jparse(df, null);
+      const [state, def] = await getSD();
       if (!def || !state.id || id !== state.id) return res.status(409).json({ ok: false, error: 'stale' });
       const now = Date.now();
       const live = state.status === 'open' || (state.status === 'closed' && state.closedAt && now - state.closedAt <= GRACE_MS);
@@ -179,17 +203,22 @@ module.exports = async function handler(req, res) {
     if (!ADMIN_PASSWORD) return res.status(500).json({ ok: false, error: 'not_configured' });
     if (!same(body.password || '', ADMIN_PASSWORD)) { await sleep(1200); return res.status(401).json({ ok: false, error: 'wrong_password' }); }
 
-    const [st, df] = await pipe([['GET', K.state], ['GET', K.def]]);
-    const state = Object.assign({}, EMPTY_STATE, jparse(st, {}));
-    const def = jparse(df, null);
+    forget(); // 선생님은 항상 최신 상태로
+    const [state, def] = await getSD();
 
     if (body.action === 'qget') return res.status(200).json({ ok: true, state, def });
+
+    if (body.action === 'qhealth') { // 행사 전 점검: 저장소 응답 시간과 현재 제출 수
+      const t0 = Date.now();
+      const [pong, n] = await pipe([['PING'], ['HLEN', K.sub(state.id || '-')]]);
+      return res.status(200).json({ ok: pong === 'PONG', ms: Date.now() - t0, n, state });
+    }
 
     if (body.action === 'qsave') {
       if (state.status === 'open' || state.status === 'closed') return res.status(409).json({ ok: false, error: 'quiz_open' }); // 채점이 끝난 회차의 문제를 바꾸지 못하게 (새 회차를 만든 뒤 수정)
       const d = cleanDef(body.def);
       if (!d) return res.status(400).json({ ok: false, error: 'bad_quiz' });
-      await pipe([['SET', K.def, JSON.stringify(d)]]);
+      await writeState(state, d, true);
       return res.status(200).json({ ok: true, def: d });
     }
 
@@ -211,14 +240,14 @@ module.exports = async function handler(req, res) {
         next.status = body.status;
       }
       if (body.reveal !== undefined) next.reveal = !!body.reveal;
-      await pipe([['SET', K.state, JSON.stringify(next)]]);
+      await writeState(next, def);
       return res.status(200).json({ ok: true, state: next });
     }
 
     if (body.action === 'qnew') {
       if (!def) return res.status(409).json({ ok: false, error: 'no_quiz' });
       const next = { id: Date.now().toString(36), status: 'ready', reveal: false, openedAt: 0, closedAt: 0 };
-      await pipe([['SET', K.state, JSON.stringify(next)]]);
+      await writeState(next, def);
       return res.status(200).json({ ok: true, state: next });
     }
 

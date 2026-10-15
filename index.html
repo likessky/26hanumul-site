@@ -259,6 +259,7 @@ footer{color:var(--muted);font-size:12px;text-align:center}
 "homeNote":"반별 인원 확인이 끝나면 담임 선생님 안내에 따라 귀가",
 "mapLink":"https://seoulland.co.kr/?p=13&type=attraction&key=&idx=59",
 "quizBackup":"",
+"quizBackupOn":"",
 "program":[
   {"type":"개회식","title":"안전 및 학교폭력예방교육 영상 시청 (비상 대피요령 포함)"},
   {"type":"공식행사","title":"교장선생님 개회사 및 내빈 소개, 학교운영위원장님 축사"},
@@ -557,7 +558,7 @@ function lsGet(k,d){try{var v=JSON.parse(localStorage.getItem(k)||'null');return
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function qNew(id){return{id:id||'',ans:[],nonce:rnd(),submitted:null,tries:0,shownAt:0,ce:0,pending:false,err:''}}
 var Q=lsGet(LSQQ,null),qme=lsGet(LSQME,{sid:'',name:'',ok:false}),qs=lsGet(LSQ,null)||qNew('');
-var qLoading=false,qFlight=false,qRetry=null,qMsg='';
+var qLoading=false,qFlight=false,qRetry=null,qMsg='',qFails=0;
 function qSigOf(){return Q?Q.id+'|'+Q.status+'|'+Q.reveal+'|'+(Q.questions?Q.questions.length:0):''}
 var qSig=qSigOf();
 /* index.html과 api/quiz.js의 norm()은 똑같이 유지 */
@@ -573,17 +574,22 @@ function qGrade(i){var q=Q.questions[i],a=qs.ans[i];if(a==null||String(a)==='')r
 function qLoad(){
   if(qLoading)return;qLoading=true;
   var ctl=window.AbortController?new AbortController():null,timer=setTimeout(function(){if(ctl)ctl.abort()},8000);
-  fetch(QAPI,{cache:'no-cache',signal:ctl?ctl.signal:undefined}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(j){
+  /* 일반 요청으로 보냄(no-cache를 붙이지 않음) → 350명의 요청을 버셀 CDN이 대신 받아 줌 */
+  fetch(QAPI,{signal:ctl?ctl.signal:undefined}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(j){
     clearTimeout(timer);qLoading=false;
-    if(!j||typeof j!=='object'||typeof j.status!=='string')return;
+    if(!j||typeof j!=='object'||typeof j.status!=='string')throw new Error('bad');
+    if(qFails>=3){qFails=0;qUI()}else qFails=0;
     Q=j;lsSet(LSQQ,Q);
     if(Q.id&&qs.id!==Q.id){clearTimeout(qRetry);qs=qNew(Q.id);lsSet(LSQ,qs)} // 새 회차면 이전 답은 비움
     if(Q.status==='open'&&qs.id===Q.id&&!qs.shownAt){qs.shownAt=Date.now();lsSet(LSQ,qs)}
     var sig=qSigOf();if(sig!==qSig){qSig=sig;qUI()}
     if(typeof qSched==='function')qSched();
-  }).catch(function(){clearTimeout(timer);qLoading=false}); // 실패하면 조용히 넘어가고 다음 확인 때 다시
+  }).catch(function(){clearTimeout(timer);qLoading=false;
+    /* 3번 연속 실패하면 "연결 불안정" 안내 + 예비 제출 버튼. 선생님의 예비 제출 전환(data.json)도 바로 확인 */
+    qFails++;if(qFails>=3){load();if(qFails===3)qUI()}
+  });
 }
-function qDelay(){var s=Q?Q.status:'off';return(s==='ready'?3:s==='open'?15:s==='closed'?20:30)*1000*(0.75+Math.random()*0.5)}
+function qDelay(){var s=Q?Q.status:'off';return(s==='ready'?4:s==='open'?15:s==='closed'?20:30)*1000*(0.75+Math.random()*0.5)}
 function qErrText(e){return{duplicate:'이 학번으로 이미 제출된 답이 있어요. 담임 선생님께 알려 주세요.',closed:'마감되어 제출되지 않았어요.',stale:'퀴즈가 새로 시작됐어요. 화면을 새로고침해 주세요.',bad_sid:'학번을 확인해 주세요.',bad_name:'이름을 확인해 주세요.',full:'제출이 가득 찼어요. 선생님께 알려 주세요.'}[e]||('제출하지 못했어요('+e+').')}
 function qBackupBtn(){var u=S.quizBackup||'';return /^https:\/\//.test(u)?'<a class="btn small primary" href="'+esc(u)+'" target="_blank" rel="noopener">예비 제출 열기</a>':''}
 function qRetryLater(){
@@ -608,8 +614,19 @@ function qSubmit(){
     qs.pending=false;qs.err=j.error||'error';lsSet(LSQ,qs);qUI(); // 중복·마감 등: 다시 보내도 소용없음
   }).catch(function(){clearTimeout(timer);qFlight=false;qRetryLater()});
 }
+/* 휴대폰에 저장된 내 답 요약 (예비 제출에 옮겨 적을 때 보는 용도) */
+function qMine(){
+  if(!Q||!Q.questions||qs.id!==Q.id||!qAnswered())return'';
+  return '<p class="callout">내 답 · '+Q.questions.map(function(q,i){var a=qs.ans[i];return(i+1)+'번 '+((a==null||a==='')?'-':(q.type==='choice'?CIRC.charAt(+a):esc(a)))}).join(' · ')+'</p>'}
+/* 예비 제출 안내: 선생님이 전환했거나(data.json) 이 휴대폰이 퀴즈 서버에 계속 연결되지 않을 때 */
+function qBackupBox(){
+  var forced=S.quizBackupOn==='on',sick=qFails>=3;
+  if(!forced&&!sick)return'';
+  return '<div class="card" style="border-color:var(--accent)"><h3>'+(forced?'선생님 안내: 예비 제출로 참여해 주세요':'퀴즈 서버 연결이 불안정해요')+'</h3>'+
+   '<p class="callout">'+(forced?'퀴즈 서버에 문제가 생겨 예비 제출로 바꿨어요. 아래 버튼으로 들어가 학번·이름과 답을 적어 주세요.':'이 화면은 계속 다시 연결해요. 선생님이 예비 제출을 안내하면 아래 버튼을 눌러 주세요.')+'</p>'+
+   qMine()+'<div>'+(qBackupBtn()||'<span style="color:var(--muted);font-size:14px">예비 제출 주소가 아직 없어요. 선생님 안내를 따라 주세요.</span>')+'</div></div>'}
 function qPendingBox(){
-  var more=qs.tries>=6?'<p class="callout">계속 안 되면 예비 제출을 써 주세요. (이 화면은 계속 다시 보내요)</p><div>'+qBackupBtn()+'</div>':'';
+  var more=qs.tries>=3?'<p class="callout">계속 안 되면 예비 제출을 써 주세요. (이 화면은 계속 다시 보내요)</p>'+qMine()+'<div>'+qBackupBtn()+'</div>':'';
   return '<div class="card"><h3>연결이 약해 다시 보내는 중이에요</h3><p class="callout">'+qs.tries+'번째 시도 · 답은 휴대폰에 저장돼 있으니 이 화면을 닫지 말고 기다려 주세요.</p>'+more+'</div>'}
 function qIdForm(){
   return '<div class="card qid"><h3>학번과 이름</h3><div class="field"><label for="q-sid">학번 (5자리 숫자)</label><input id="q-sid" inputmode="numeric" pattern="[0-9]*" maxlength="5" autocomplete="off" data-qme="sid" value="'+esc(qme.sid)+'"></div>'+
@@ -648,6 +665,7 @@ function qResult(){
   return '<div class="card"><h3>내 결과 · '+sc+' / '+n+'</h3>'+(qs.submitted?'':'<p class="callout">제출하지 않아 순위에는 들어가지 않아요.</p>')+rows+'</div>'}
 function vQuiz(){
   var out='<div class="sec-h"><h2>퀴즈</h2><p>선생님이 시작하면 문제가 열려요. 끝까지 풀고 한 번만 제출해요.</p></div>';
+  if(!(qs.submitted&&Q&&qs.id===Q.id))out+=qBackupBox();
   if(!Q||!Q.id||Q.status==='off')return out+'<div class="card"><h3>지금은 퀴즈가 없어요</h3><p class="callout">퀴즈 시간이 되면 이 화면에 문제가 나와요. 선생님 안내를 기다려 주세요.</p></div>';
   var mine=qs.id===Q.id;
   if(mine&&qs.submitted)out+=qDone();
@@ -660,7 +678,7 @@ function vQuiz(){
 }
 
 /* ---------- 퀴즈 (선생님) ---------- */
-var qa={loaded:false,loading:false,failed:false,state:null,draft:null,busy:false,msg:'',count:null,results:null,timer:0};
+var qa={loaded:false,loading:false,failed:false,state:null,draft:null,busy:false,msg:'',health:'',count:null,results:null,timer:0};
 function qapi(body){body.password=adminPw;return api(body,QAPI)}
 function qToDraft(def){return{title:def.title||'',questions:def.questions.map(function(q){return{type:q.type,text:q.text||'',img:q.img||'',choices:(q.choices||[]).slice(),answer:q.type==='choice'?q.answer:0,ans:q.type==='short'?(q.answer||[]).join(', '):''}})}}
 function qBlank(){return{type:'choice',text:'',img:'',choices:['','','',''],answer:0,ans:''}}
@@ -724,6 +742,19 @@ function qaResults(){
   qa.msg='결과를 불러오는 중…';render();
   qapi({action:'qresults'}).then(function(r){if(r.ok){qa.results=r;qa.msg=''}else qa.msg=errText(r.error);render()}).catch(function(){qa.msg=errText('network');render()});
 }
+/* 서버 점검: ① 저장소(Redis) 응답 시간 ② 학생 요청을 버셀 CDN이 대신 받아 주는지(x-vercel-cache) */
+function qaHealth(){
+  qa.health='점검 중…';render();
+  var t0=Date.now(),h={};
+  qapi({action:'qhealth'}).then(function(r){
+    h.redis=r.ok?'저장소 정상 ('+(Date.now()-t0)+'ms, 서버 안 '+r.ms+'ms)':'저장소 오류: '+errText(r.error);
+    return fetch(QAPI).then(function(){return new Promise(function(ok){setTimeout(ok,300)})}).then(function(){return fetch(QAPI)});
+  }).then(function(r2){
+    var c=(r2.headers.get('x-vercel-cache')||'').toUpperCase();
+    h.cdn=(c==='HIT'||c==='STALE')?'CDN 캐시 작동 ('+c+') → 350명이 동시에 확인해도 서버 부담 적음':'CDN 캐시 확인 안 됨 ('+(c||'헤더 없음')+') → 몇 번 더 눌러 보고, 계속 MISS면 부하 테스트로 확인 필요';
+    qa.health=h.redis+'\n'+h.cdn;render();
+  }).catch(function(){qa.health=(h.redis||'저장소 연결 실패')+'\n학생용 주소 확인 실패';render()});
+}
 function csvCell(c){c=String(c);if(/^[=+\-@]/.test(c))c="'"+c;return '"'+c.replace(/"/g,'""')+'"'}
 function qaCsv(){
   var rows=[['순위','학번','이름','점수','걸린시간(초)','휴대폰측정(초)','재시도','접수번호','제출시각']];
@@ -734,7 +765,7 @@ function qaCsv(){
 function quizCard(){
   if(!qa.loaded){
     if(!qa.loading&&!qa.failed)qaLoad();
-    return '<div class="card"><h3>퀴즈</h3><p class="callout">'+(qa.failed?esc(qa.msg||'불러오지 못했어요.'):'불러오는 중…')+'</p>'+(qa.failed?'<button class="btn small" data-act="qaretry">다시 불러오기</button>':'')+'</div>';
+    return '<div class="card"><h3>퀴즈</h3><p class="callout">'+(qa.failed?esc(qa.msg||'불러오지 못했어요.'):'불러오는 중…')+'</p>'+(qa.failed?'<button class="btn small" data-act="qaretry">다시 불러오기</button><p class="callout">퀴즈 진행 중에 이 오류가 계속되면: 아래 <b>기본 정보 → 퀴즈 예비 제출 안내</b>를 "켜기"로 바꾸고 저장하세요. 학생 화면에 예비 제출 버튼이 떠요. (학생들의 답은 휴대폰에 남아 서버가 돌아오면 자동으로 다시 제출돼요)</p>':'')+'</div>';
   }
   var st=qa.state,s=st.status,has=!!st.id,d=qa.draft,locked=(s==='open'||s==='closed');
   var label={off:'숨김',ready:'대기 중 (학생이 학번을 입력하는 단계)',open:'진행 중',closed:'마감'}[s];
@@ -767,6 +798,9 @@ function quizCard(){
     '<div style="display:flex;gap:8px;flex-wrap:wrap">'+ctl+'</div>'+
     '<p class="callout">흐름: 새 회차(대기) → 학생이 학번 입력 → ▶ 시작 → ■ 마감(마감 뒤 2분까지는 늦게 도착한 제출도 받아요) → 결과 공개. 이 카드는 아래 "저장"과 상관없이 바로 반영돼요.</p>'+
     (qa.msg?'<p class="callout" role="status">'+esc(qa.msg)+'</p>':'')+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn small" data-act="qahealth">서버 점검</button><span style="font-size:13px;color:var(--muted)">행사 전과 시작 직전에 눌러 확인해요</span></div>'+
+    (qa.health?'<p class="callout" style="white-space:pre-line">'+esc(qa.health)+'</p>':'')+
+    '<p class="callout">퀴즈 서버가 안 될 때: 아래 <b>기본 정보 → 퀴즈 예비 제출 안내</b>를 "켜기"로 바꾸고 저장하면 1~3분 안에 학생 퀴즈 화면에 예비 제출(구글 설문) 버튼이 크게 떠요. 이 방법은 퀴즈 서버와 상관없이 작동해요.</p>'+
     '<h3 style="margin-top:6px">문제 만들기'+(locked?' <span style="font-weight:400;color:var(--muted);font-size:14px">(진행·마감 중에는 고칠 수 없어요. 새 회차를 만들면 고칠 수 있어요)</span>':'')+'</h3>'+
     '<div class="field"><label for="qa-title">퀴즈 제목 (선택)</label><input id="qa-title" data-qt="1" maxlength="60" value="'+esc(d.title)+'"'+(locked?' disabled':'')+'></div>'+
     '<div class="erows">'+qh+'</div>'+
@@ -806,7 +840,8 @@ function renderEditor(){
   app.innerHTML='<div class="wrap plain"><div class="editor">'+
    '<div class="sec-h"><h2>식순·안내 수정</h2><p>맨 위 공지는 바로 보내져요. 아래 내용은 저장하면 사이트가 새로 배포되고(약 1분), 학생 화면에는 그 뒤 3분 안에 반영돼요.</p></div>'+
    annCard()+quizCard()+
-   '<div class="card"><h3>기본 정보</h3><div class="grid2">'+f('s-date','행사 날짜',d.date,'date')+f('s-venue','장소',d.venue)+f('s-start','공연 시작',d.start,'time')+f('s-morningTime','아침 집결 시각',d.morningTime,'time')+f('s-morningPlace','아침 집결 장소',d.morningPlace)+f('s-meetTime','퇴장 집결 시각 (체험 종료)',d.meetTime,'time')+f('s-meetPlace','퇴장 집결 장소',d.meetPlace)+f('s-homeNote','귀가 방법',d.homeNote)+f('s-quizBackup','퀴즈 예비 제출 주소 (구글 설문 링크, 선택)',d.quizBackup||'')+'</div></div>'+
+   '<div class="card"><h3>기본 정보</h3><div class="grid2">'+f('s-date','행사 날짜',d.date,'date')+f('s-venue','장소',d.venue)+f('s-start','공연 시작',d.start,'time')+f('s-morningTime','아침 집결 시각',d.morningTime,'time')+f('s-morningPlace','아침 집결 장소',d.morningPlace)+f('s-meetTime','퇴장 집결 시각 (체험 종료)',d.meetTime,'time')+f('s-meetPlace','퇴장 집결 장소',d.meetPlace)+f('s-homeNote','귀가 방법',d.homeNote)+f('s-quizBackup','퀴즈 예비 제출 주소 (구글 설문 링크, 선택)',d.quizBackup||'')+
+   '<div class="field"><label for="s-quizBackupOn">퀴즈 예비 제출 안내 (퀴즈 서버 장애 때만 켜기)</label><select id="s-quizBackupOn" data-s="quizBackupOn"><option value=""'+(d.quizBackupOn==='on'?'':' selected')+'>끄기 (평소)</option><option value="on"'+(d.quizBackupOn==='on'?' selected':'')+'>켜기 → 학생 화면에 예비 제출 버튼</option></select></div></div></div>'+
    '<div class="card"><h3>비상 연락처</h3><div class="erows">'+crow+'</div><button class="btn" data-act="cadd">연락처 추가</button></div>'+
    '<div class="card"><h3>지도 위치 표시</h3><p class="callout">"지도에서 위치 찍기"를 누른 뒤 아래 지도에서 그 장소를 누르면 번호가 표시돼요.</p><div class="erows">'+prow+'</div><button class="btn" data-act="madd">위치 추가</button>'+mapBlock(d.pins,{placing:placing>-1})+'</div>'+
    '<div class="card"><h3>식순 <span class="mono" style="font-weight:400;color:var(--muted);font-size:14px">'+d.program.length+'개</span></h3><div class="erows">'+rows+'</div><button class="btn" data-ins="'+d.program.length+'">순서 추가</button>'+
@@ -968,6 +1003,7 @@ app.addEventListener('click',function(ev){
     if(qa2==='qaoff'){qaStatus({action:'qstatus',status:'off'},'학생 화면에서 퀴즈를 숨길까요?');return}
     if(qa2==='qareveal'){qaStatus({action:'qstatus',reveal:!qa.state.reveal},qa.state.reveal?'':'점수와 정답을 학생에게 공개할까요?');return}
     if(qa2==='qaresults'){qaResults();return}
+    if(qa2==='qahealth'){qaHealth();return}
     if(qa2==='qacsv'){if(qa.results)qaCsv();return}
   }
   if(b.dataset.filter){filter=b.dataset.filter;render();return}
