@@ -249,7 +249,7 @@ footer{color:var(--muted);font-size:12px;text-align:center}
   {"type":"밴드공연","title":"라온밴드(8명) - 피날레 밴드 라이브 공연"}],
 "pins":[
   {"label":"이벤트홀 (한우물제 공연장)","kind":"stage","x":32.79,"y":14.72},
-  {"label":"16:00 집결 장소","kind":"meet","x":39.34,"y":63.22},
+  {"label":"16:00 퇴장 집결 장소","kind":"meet","x":39.34,"y":63.22},
   {"label":"의무실","kind":"aid","x":16.68,"y":46.59},
   {"label":"안내소","kind":"info","x":37.34,"y":54.97},
   {"label":"선생님 대기 위치","kind":"teacher","x":null,"y":null}],
@@ -280,7 +280,7 @@ footer{color:var(--muted);font-size:12px;text-align:center}
 "homeChecks":[
   "내 소지품(가방, 휴대폰, 지갑)을 모두 챙겼어요",
   "우리 조 친구들이 모두 함께 있어요",
-  "16:00까지 집결 장소에 도착했어요",
+  "16:00까지 퇴장 집결 장소에 도착했어요",
   "담임 선생님께 출석 확인을 받았어요",
   "보호자께 귀가 출발 연락을 드렸어요"],
 "contacts":[
@@ -349,19 +349,19 @@ function header(){
 /* 메인(식순 탭) 맨 위: 큰 교표 링 + 행사 이름 + 지금 상태 + 꼭 알아야 할 정보 4칸 */
 function hero(st){
   var tag,txt,mt=/^\d{1,2}:\d{2}$/.test(S.morningTime||'')?S.morningTime:'',mp=S.morningPlace||'';
-  if(st.phase==='before'){tag='D-'+st.days;txt=(mt?esc(mt)+' '+esc(mp||'아침')+' 집결 · ':'')+esc(S.start)+' 시작 · '+esc(S.meetTime)+' 집결'}
+  if(st.phase==='before'){tag='D-'+st.days;txt=(mt?esc(mt)+' '+esc(mp||'아침')+' 집결 · ':'')+esc(S.start)+' 시작 · '+esc(S.meetTime)+' 체험 종료·퇴장 집결'}
   else if(st.phase==='pre'&&mt&&st.n<m(mt)){tag='오늘';txt=esc(mt)+'까지 '+(mp?esc(mp)+ro(mp)+' ':'')+'모여요 · '+dur(m(mt)-st.n)+' 남음'}
   else if(st.phase==='pre'){tag='오늘';txt=esc(S.start)+' 개회까지 '+dur(st.left)}
-  else if(st.phase==='day'){tag='진행 중';txt=esc(S.meetTime)+' 집결까지 '+dur(st.left)}
-  else if(st.phase==='meet'){tag='집결';txt='지금 모이세요 · '+esc(S.meetPlace)}
+  else if(st.phase==='day'){tag='진행 중';txt=esc(S.meetTime)+' 퇴장 집결까지 '+dur(st.left)}
+  else if(st.phase==='meet'){tag='퇴장 집결';txt='체험 끝! 지금 모이세요 · '+esc(S.meetPlace)}
   else{tag='종료';txt='수고했어요. 안전하게 귀가하세요'}
   var meetPin=-1;S.pins.forEach(function(p,i){if(meetPin<0&&p.kind==='meet'&&p.x!=null)meetPin=i});
-  var place=meetPin>-1?'<button class="fact" data-gopin="'+meetPin+'"><small>집결 장소</small><b class="txt">'+esc(S.meetPlace)+'</b><em>지도에서 보기 ›</em></button>':'<div class="fact"><small>집결 장소</small><b class="txt">'+esc(S.meetPlace)+'</b></div>';
+  var place=meetPin>-1?'<button class="fact" data-gopin="'+meetPin+'"><small>퇴장 집결 장소</small><b class="txt">'+esc(S.meetPlace)+'</b><em>지도에서 보기 ›</em></button>':'<div class="fact"><small>퇴장 집결 장소</small><b class="txt">'+esc(S.meetPlace)+'</b></div>';
   return '<div class="hero"><div class="ring"><img src="emblem.png" alt="금정중학교 교표" width="104" height="104"></div>'+
    '<p class="eyebrow">'+esc(S.school)+' 학생 축제</p><h1>2026 <span>'+esc(S.title)+'</span></h1>'+
    '<div class="pills"><span class="pill">'+fmtDate(S.date)+'</span><span class="pill">'+esc(S.venue)+'</span></div></div>'+
    '<div class="status" aria-live="polite"><span class="tag mono">'+tag+'</span><span>'+txt+'</span></div>'+
-   '<div class="facts"><div class="fact"><small>공연 시작</small><b class="mono">'+esc(S.start)+'</b></div><div class="fact"><small>집결 시각</small><b class="mono">'+esc(S.meetTime)+'</b></div>'+
+   '<div class="facts"><div class="fact"><small>공연 시작</small><b class="mono">'+esc(S.start)+'</b></div><div class="fact"><small>체험 종료·퇴장 집결</small><b class="mono">'+esc(S.meetTime)+'</b></div>'+
    '<div class="fact"><small>공연장</small><b class="txt">'+esc(S.venue)+'</b></div>'+place+'</div>';
 }/* 탭 아이콘 (선 아이콘, 파일을 따로 받지 않도록 코드에 직접) */
 var ICON={schedule:'<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/>',
@@ -430,16 +430,16 @@ function vFree(st){
   var steps=[
     {t:'공연 후',a:'공연 종료 · 반별 퇴장',b:'선생님이 부르는 순서대로 천천히 나가요',at:null},
     {t:'퇴장 후',a:'자유시간 (점심 포함)',b:'조별로 함께 다녀요',at:null},
-    {t:hm(meet-10),a:'집결 장소로 이동',b:'놀이기구 줄은 이 시간 전에 마무리해요',at:meet-10},
-    {t:S.meetTime,a:'집결 · 반별 인원 확인',b:S.meetPlace,at:meet},
+    {t:hm(meet-10),a:'체험 마무리 · 퇴장 집결 장소로 이동',b:'놀이기구 줄은 이 시간 전에 마무리해요',at:meet-10},
+    {t:S.meetTime,a:'퇴장 집결 · 반별 인원 확인',b:S.meetPlace,at:meet},
     {t:'확인 후',a:'귀가',b:S.homeNote,at:meet+15}];
   var k=-1;if(live)steps.forEach(function(s,i){if(s.at!=null&&n>=s.at)k=i});
   var tlHtml=steps.map(function(s,i){var c='';if(st.phase==='home'||st.phase==='after')c='done';else if(k>-1){c=i<k?'done':i===k?'on':''}return'<li class="'+c+'"><span class="t">'+esc(s.t)+'</span><span class="dot"></span><span class="d">'+esc(s.a)+'<small>'+esc(s.b)+'</small></span></li>'}).join('');
-  var cd=st.phase==='day'?'집결까지 '+dur(st.left)+' 남았어요':st.phase==='meet'?'지금 집결 시간이에요':'늦을 것 같으면 미리 담임 선생님께 연락해요';
+  var cd=st.phase==='day'?'퇴장 집결까지 '+dur(st.left)+' 남았어요':st.phase==='meet'?'체험 끝! 지금 퇴장 집결 시간이에요':'늦을 것 같으면 미리 담임 선생님께 연락해요';
   var meetPin=-1;S.pins.forEach(function(p,i){if(meetPin<0&&p.kind==='meet'&&p.x!=null)meetPin=i});
   var chk=S.homeChecks.map(function(c,i){var id='chk-'+i;return'<label for="'+id+'"><input type="checkbox" id="'+id+'" data-chk="'+esc(c)+'"'+(checks[c]?' checked':'')+'><span>'+esc(c)+'</span></label>'}).join('');
   return'<div class="sec-h"><h2>자유시간과 귀가</h2><p>공연이 끝나면 서울랜드에서 자유롭게 지내고, 정해진 시각에 다시 모여요.</p></div>'+
-  '<div class="meet"><span class="clock mono">'+esc(S.meetTime)+'</span><div class="info"><b>집결 장소 · '+esc(S.meetPlace)+'</b><span>'+cd+'</span></div>'+(meetPin>-1?'<button class="btn small primary" data-gopin="'+meetPin+'">지도에서 보기</button>':'')+'</div>'+
+  '<div class="meet"><span class="clock mono">'+esc(S.meetTime)+'</span><div class="info"><b>퇴장 집결 장소 · '+esc(S.meetPlace)+'</b><span>'+cd+'</span></div>'+(meetPin>-1?'<button class="btn small primary" data-gopin="'+meetPin+'">지도에서 보기</button>':'')+'</div>'+
   '<div class="card"><h3>오후 일정</h3><ol class="tl">'+tlHtml+'</ol></div>'+
   '<div class="card"><h3>자유시간 약속</h3><ul class="rules">'+S.freeRules.map(function(r){return'<li>'+esc(r)+'</li>'}).join('')+'</ul></div>'+
   '<div class="card"><h3>귀가 전 체크</h3><div class="check">'+chk+'</div><p class="callout">체크한 내용은 내 휴대폰에만 저장돼요.</p></div>';
@@ -549,7 +549,7 @@ function renderEditor(){
   app.innerHTML='<div class="wrap plain"><div class="editor">'+
    '<div class="sec-h"><h2>식순·안내 수정</h2><p>맨 위 공지는 바로 보내져요. 아래 내용은 저장하면 사이트가 새로 배포되고(약 1분), 학생 화면에는 그 뒤 3분 안에 반영돼요.</p></div>'+
    annCard()+
-   '<div class="card"><h3>기본 정보</h3><div class="grid2">'+f('s-date','행사 날짜',d.date,'date')+f('s-venue','장소',d.venue)+f('s-start','공연 시작',d.start,'time')+f('s-morningTime','아침 집결 시각',d.morningTime,'time')+f('s-morningPlace','아침 집결 장소',d.morningPlace)+f('s-meetTime','집결 시각',d.meetTime,'time')+f('s-meetPlace','집결 장소',d.meetPlace)+f('s-homeNote','귀가 방법',d.homeNote)+'</div></div>'+
+   '<div class="card"><h3>기본 정보</h3><div class="grid2">'+f('s-date','행사 날짜',d.date,'date')+f('s-venue','장소',d.venue)+f('s-start','공연 시작',d.start,'time')+f('s-morningTime','아침 집결 시각',d.morningTime,'time')+f('s-morningPlace','아침 집결 장소',d.morningPlace)+f('s-meetTime','퇴장 집결 시각 (체험 종료)',d.meetTime,'time')+f('s-meetPlace','퇴장 집결 장소',d.meetPlace)+f('s-homeNote','귀가 방법',d.homeNote)+'</div></div>'+
    '<div class="card"><h3>비상 연락처</h3><div class="erows">'+crow+'</div><button class="btn" data-act="cadd">연락처 추가</button></div>'+
    '<div class="card"><h3>지도 위치 표시</h3><p class="callout">"지도에서 위치 찍기"를 누른 뒤 아래 지도에서 그 장소를 누르면 번호가 표시돼요.</p><div class="erows">'+prow+'</div><button class="btn" data-act="madd">위치 추가</button>'+mapBlock(d.pins,{placing:placing>-1})+'</div>'+
    '<div class="card"><h3>식순 <span class="mono" style="font-weight:400;color:var(--muted);font-size:14px">'+d.program.length+'개</span></h3><div class="erows">'+rows+'</div><button class="btn" data-ins="'+d.program.length+'">순서 추가</button>'+
@@ -560,7 +560,7 @@ function renderEditor(){
   wireMap();
 }
 /* 공지 보내기 (관리자). 저장 버튼과 별개로 바로 전송 */
-var ANN_PRESETS=['08:50까지 서울랜드 정문으로 모여 주세요.','이제 공연을 시작합니다. 무대에 집중해 주세요.','잠시 후 다음 순서가 시작돼요. 자리로 돌아와 주세요.','공연이 끝났어요. 선생님 안내에 따라 천천히 퇴장해요.','16:00까지 집결 장소로 모여 주세요.'];
+var ANN_PRESETS=['08:50까지 서울랜드 정문으로 모여 주세요.','이제 공연을 시작합니다. 무대에 집중해 주세요.','잠시 후 다음 순서가 시작돼요. 자리로 돌아와 주세요.','공연이 끝났어요. 선생님 안내에 따라 천천히 퇴장해요.','체험을 마무리하고 16:00까지 퇴장 집결 장소로 모여 주세요.'];
 var annDraft={text:'',minutes:10},annMsg='',annBusy=false;
 function annCard(){
   var cur=annActive()?'<p class="callout">지금 떠 있는 공지: <b>'+esc(ann.text)+'</b> ('+Math.max(1,Math.ceil((new Date(ann.until)-Date.now())/60000))+'분 남음)</p>':'';
@@ -591,7 +591,7 @@ function setMsg(t){var e=document.getElementById('savemsg');if(e)e.textContent=t
 function toast(t){var e=document.createElement('div');e.className='toast';e.setAttribute('role','status');e.textContent=t;document.body.appendChild(e);setTimeout(function(){e.remove()},3800)}
 function validate(d){
   if(!/^\d{2}:\d{2}$/.test(d.start))return'공연 시작 시각을 확인해 주세요.';
-  if(!/^\d{2}:\d{2}$/.test(d.meetTime))return'집결 시각을 확인해 주세요.';
+  if(!/^\d{2}:\d{2}$/.test(d.meetTime))return'퇴장 집결 시각을 확인해 주세요.';
   if(d.morningTime&&!/^\d{2}:\d{2}$/.test(d.morningTime))return'아침 집결 시각을 확인해 주세요.';
   if(!/^\d{4}-\d{2}-\d{2}$/.test(d.date))return'행사 날짜를 확인해 주세요.';
   for(var i=0;i<d.program.length;i++){var p=d.program[i];if(!String(p.title).trim())return(i+1)+'번 순서의 내용이 비어 있어요.'}
