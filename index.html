@@ -697,7 +697,7 @@ app.addEventListener('click',function(ev){
   if(a==='mapfull'){mapFull=!mapFull;zoom=null;var yf=window.scrollY;render();if(!mapFull)window.scrollTo(0,yf);return}
   if(a==='login'||a==='cancel')mapFull=false;
   if(a==='login'){loginErr='';mode=adminPw?'edit':'login';if(mode==='edit'){draft=JSON.parse(JSON.stringify(S))}render();window.scrollTo({top:0});return}
-  if(a==='cancel'){mode='view';draft=null;placing=-1;loginErr='';render();load();return}
+  if(a==='cancel'){mode='view';draft=null;placing=-1;loginErr='';if(typeof needReload!=='undefined'&&needReload){freshReload();return}render();load();return}
   if(a==='save'){save();return}
   if(a==='cadd'){draft.contacts.push({role:'',name:'',phone:''});render();return}
   if(a==='madd'){draft.pins.push({label:'',kind:'etc',x:null,y:null});render();return}
@@ -745,7 +745,15 @@ window.addEventListener('online',function(){load();loadAnn()});
 window.addEventListener('offline',function(){online=false;if(mode==='view'&&tab!=='map')render()});
 /* 오프라인 저장: 한 번 열면 다음부터는 통신이 안 돼도 열려요 */
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
-  window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
+  /* 새 화면이 배포되면 다시 접속만 해도 바뀌도록: 새 버전을 받으면 한 번 새로고침
+     (선생님 수정 화면에서 편집 중이면 작성 내용이 날아가지 않게 수정 화면을 나갈 때까지 미룸) */
+  var hadSW=!!navigator.serviceWorker.controller,reloading=false,needReload=false;
+  function freshReload(){if(reloading)return;if(mode==='edit'){needReload=true;return}reloading=true;location.reload()}
+  navigator.serviceWorker.addEventListener('controllerchange',function(){if(hadSW)freshReload();hadSW=true});
+  navigator.serviceWorker.addEventListener('message',function(e){if(e.data&&e.data.type==='page-updated')freshReload()});
+  window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(reg){
+    document.addEventListener('visibilitychange',function(){if(document.hidden)return;if(needReload&&mode!=='edit'){freshReload();return}reg.update().catch(function(){})});
+  }).catch(function(){})});
 }
 })();
 </script>
