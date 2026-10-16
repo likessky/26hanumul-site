@@ -157,7 +157,8 @@ module.exports = async function handler(req, res) {
       res.setHeader('Cache-Control', 'public, max-age=1'); // 브라우저는 1초만 기억
       // 버셀 CDN은 평소 2초, 카운트다운 중에는 1초(공개 순간을 놓치지 않게). 서버 오류 때는 10분까지 마지막 정상 응답
       // 공개 1.5초 전부터는 "아직 문제 없음" 응답을 CDN에 남기지 않음 → 0초에 받은 요청이 바로 문제를 받음
-      res.setHeader('Vercel-CDN-Cache-Control', waiting && pub.openedAt - now < 1500 ? 'no-store' : `max-age=${waiting ? 1 : 2}, stale-if-error=600`);
+      // 숨김(off) 상태는 15초: 하루 종일 사이트를 열어 둔 휴대폰이 많아도 서버·Redis 호출이 거의 없음
+      res.setHeader('Vercel-CDN-Cache-Control', waiting && pub.openedAt - now < 1500 ? 'no-store' : `max-age=${waiting ? 1 : pub.status === 'off' || !pub.id ? 15 : 2}, stale-if-error=600`);
       return res.status(200).json(out);
     }
 
@@ -258,6 +259,14 @@ module.exports = async function handler(req, res) {
 
     if (body.action === 'qnew') {
       if (!def) return res.status(409).json({ ok: false, error: 'no_quiz' });
+      const next = { id: Date.now().toString(36), status: 'ready', reveal: false, openedAt: 0, closedAt: 0 };
+      await writeState(next, def);
+      return res.status(200).json({ ok: true, state: next });
+    }
+
+    if (body.action === 'qreset') { // 연습용: 지금 회차의 제출 기록을 지우고 새 회차를 대기 상태로 (학생 휴대폰의 제출 잠금도 새 id를 받으면 풀림)
+      if (!def) return res.status(409).json({ ok: false, error: 'no_quiz' });
+      if (state.id) await pipe([['DEL', K.sub(state.id)], ['DEL', K.dup(state.id)]]);
       const next = { id: Date.now().toString(36), status: 'ready', reveal: false, openedAt: 0, closedAt: 0 };
       await writeState(next, def);
       return res.status(200).json({ ok: true, state: next });

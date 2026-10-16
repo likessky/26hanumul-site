@@ -237,13 +237,49 @@ footer{color:var(--muted);font-size:12px;text-align:center}
 .qres small{display:block;color:var(--muted);font-size:13px}
 .qtable{overflow-x:auto;min-width:0;max-width:100%}
 #qa-res{min-width:0;display:grid;gap:10px}
-.editor>.card,.card{min-width:0}
+.editor>.card,.card{min-width:0;grid-template-columns:minmax(0,1fr)}
 .qtable table{border-collapse:collapse;width:100%;font-size:13px}
 .qtable th,.qtable td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;white-space:nowrap}
 .qid{display:grid;gap:10px}
 .qid .field input{font-size:17px}
 .qedit{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--subtle);display:grid;gap:8px}
+.erows{grid-template-columns:minmax(0,1fr)}
+.qedit{min-width:0;grid-template-columns:minmax(0,1fr)}
+.qedit input[type=file]{max-width:100%}
+.presets .btn.small{height:auto;padding:8px 12px}
 .qedit img{max-width:220px;border-radius:8px;border:1px solid var(--line)}
+/* 퀴즈: 다른 탭 알림 띠 + 탭 빨간 점 */
+.qbanner{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:center;width:100%;border-radius:12px;padding:12px 16px;font-size:16px;font-weight:800;cursor:pointer;color:#FFFFFF;background:linear-gradient(45deg,var(--ig2),var(--ig3) 50%,var(--ig4));box-shadow:0 4px 14px rgba(217,46,127,.3)}
+.qbanner:focus-visible{outline:2px solid var(--action);outline-offset:2px}
+@media (prefers-reduced-motion:no-preference){.qbanner{animation:qbPulse 2.2s ease-in-out infinite}@keyframes qbPulse{50%{box-shadow:0 4px 22px rgba(217,46,127,.55)}}}
+.tab{position:relative}
+.qdot{position:absolute;top:9px;left:calc(50% + 7px);width:10px;height:10px;border-radius:50%;background:var(--danger);border:2px solid var(--bg)}
+/* 퀴즈: 학생 풀이 진행 막대 + 문제 번호 칩 */
+.qprog{position:sticky;top:calc(47px + env(safe-area-inset-top,0px));z-index:4;background:var(--bg);margin-inline:-16px;padding:10px 16px;border-bottom:1px solid var(--line);display:grid;gap:8px}
+.qmeter{height:6px;border-radius:9999px;background:var(--fill);overflow:hidden}
+.qmeter i{display:block;height:100%;border-radius:9999px;background:linear-gradient(90deg,var(--ig2),var(--ig3),var(--ig4));transition:width .25s}
+.qchips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.qchip{flex:none;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:700 14px/1 var(--f-mono);cursor:pointer;padding:0}
+.qchip.on{background:var(--action);border-color:var(--action);color:var(--action-ink)}
+.qhero{display:grid;justify-items:center;gap:6px;text-align:center;padding:8px 0}
+.qhero .em{font-size:44px;line-height:1}
+/* 퀴즈: 선생님 화면 (탭 + 단계 안내) */
+.etabs{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.etabs .sp{flex:1}
+.qsteps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;list-style:none;margin:0;padding:0}
+.qstep{display:grid;justify-items:center;gap:4px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);line-height:1.3;position:relative}
+.qstep b{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 14px/1 var(--f-mono);background:var(--fill);color:var(--muted);position:relative;z-index:1}
+.qstep:not(:last-child)::after{content:"";position:absolute;top:15px;left:calc(50% + 17px);right:calc(-50% + 17px);height:2px;background:var(--line)}
+.qstep.done b{background:var(--accent-soft);color:var(--accent)}
+.qstep.done::after{background:var(--accent)}
+.qstep.cur{color:var(--ink)}
+.qstep.cur b{background:var(--action);color:var(--action-ink);box-shadow:0 0 0 4px rgba(0,149,246,.18)}
+.qnext{display:grid;gap:8px;justify-items:start}
+.btn.big{height:52px;padding:0 28px;font-size:18px;border-radius:12px}
+.btn.warn{color:var(--danger-ink)}
+.qnow{display:flex;gap:8px;flex-wrap:wrap;font-size:14px}
+.qnow span{background:var(--fill);border-radius:9999px;padding:3px 12px;font-weight:600}
+.qnow span b{font-family:var(--f-mono)}
 /* 큰 화면 순위표 (프로젝터용): 어두운 무대 + 인스타그램 그라데이션 조명 + 시상대 */
 .board{position:fixed;inset:0;z-index:60;background:#07070C;color:#FFFFFF;overflow:auto;--rowf:clamp(14px,min(2.2vw,3.3vh),34px)}
 .board.n5{--rowf:clamp(16px,min(2.8vw,4.4vh),40px)}.board.n20{--rowf:clamp(12px,min(1.6vw,2.2vh),26px)}
@@ -588,12 +624,15 @@ function renderInner(){
   /* 메인 소개(교표·상태·정보 4칸)는 식순 탭에만, 다른 탭은 위 줄만 보여서 본문이 넓어요 */
   var bar=(annActive()&&ann.id===annClosed)?'<button class="annbar" data-act="annopen"><span aria-hidden="true">📢</span><span>'+esc(ann.text)+'</span></button>':'';
   annBarOn=!!bar;
-  var hd=header()+bar+(tab==='schedule'?hero(st):'');
+  /* 퀴즈가 열렸으면 다른 탭 위쪽에 알림 띠 + 퀴즈 탭에 빨간 점 */
+  var qb=qBanner();qBanShown=qb?qb.k:'';
+  var qbar=(qb&&tab!=='quiz')?'<button class="qbanner" data-tab="quiz">'+esc(qb.t)+'</button>':'';
+  var hd=header()+bar+qbar+(tab==='schedule'?hero(st):'');
   app.innerHTML='<div class="wrap">'+hd+
    '<section class="view">'+v+'</section>'+
    '<div class="toolbar"><span>현재 시각 <span class="mono">'+hm(nowMin())+'</span> 기준'+upd+'</span><button class="btn small" data-act="login">선생님 수정</button></div>'+
    '<footer>'+esc(S.school)+' · '+esc(S.title)+' 운영 안내</footer></div>'+
-   '<nav class="nav" role="tablist" aria-label="안내 메뉴"><div>'+TABS.map(function(t){return'<button class="tab" role="tab" data-tab="'+t[0]+'" aria-selected="'+(tab===t[0])+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+ICON[t[0]]+'</svg>'+t[1]+'</button>'}).join('')+'</div></nav>';
+   '<nav class="nav" role="tablist" aria-label="안내 메뉴"><div>'+TABS.map(function(t){return'<button class="tab" role="tab" data-tab="'+t[0]+'" aria-selected="'+(tab===t[0])+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+ICON[t[0]]+'</svg>'+t[1]+(t[0]==='quiz'&&qb&&tab!=='quiz'?'<i class="qdot" aria-label="퀴즈 알림"></i>':'')+'</button>'}).join('')+'</div></nav>';
   wireMap();
 }
 var drag=null,pinch=null,noClick=false;
@@ -641,8 +680,20 @@ var qSig=qSigOf();
 function qNorm(s){return String(s==null?'':s).normalize('NFKC').toLowerCase().replace(/[\s​.,!?'"`~\-_:;()\[\]{}<>\/\\·…]/g,'')}
 function qIdOk(){return SID_RE.test(qme.sid||'')&&String(qme.name||'').trim().length>0&&String(qme.name).length<=20}
 function qBusy(){return !!(Q&&Q.status==='open'&&qs.id===Q.id&&!qs.submitted&&(tab==='quiz'||qAnswered()>0))}
-function qUI(){if(tab==='quiz'&&mode==='view')render()}
-function qCount(){var e=document.getElementById('qcount');if(e&&Q&&Q.questions)e.textContent=qAnswered()+' / '+Q.questions.length+' 답함'}
+/* 다른 탭에서 보여 줄 퀴즈 알림 (없으면 null) */
+function qBanner(){
+  if(!Q||!Q.id)return null;var sub=qs.id===Q.id&&!!qs.submitted;
+  if(Q.status==='ready'&&!sub)return{k:'ready',t:'🎯 퀴즈가 곧 시작해요 · 학번 입력하기 ›'};
+  if(Q.status==='open'&&!sub)return{k:'open',t:'🎯 퀴즈가 시작됐어요! 지금 풀기 ›'};
+  if(Q.status==='closed'&&Q.reveal&&sub&&!qs.seenRes)return{k:'res',t:'🎯 퀴즈 결과가 나왔어요 · 내 점수 보기 ›'};
+  return null}
+var qBanShown='';
+function qUI(){if(mode!=='view')return;
+  if(tab==='quiz'){render();return}
+  var b=qBanner();if((b?b.k:'')!==qBanShown)render()} // 다른 탭에서는 알림이 바뀔 때만 다시 그림
+function qCount(){if(!Q||!Q.questions)return;var n=Q.questions.length,a=qAnswered(),e=document.getElementById('qcount');if(e)e.textContent=a+' / '+n+' 답함';
+  var f=document.getElementById('qmeterfill');if(f)f.style.width=Math.round(a*100/n)+'%';
+  var cs=app.querySelectorAll('[data-qjump]');for(var i=0;i<cs.length;i++){var k=+cs[i].dataset.qjump,on=qs.ans[k]!=null&&String(qs.ans[k]).trim()!=='';cs[i].classList.toggle('on',on);cs[i].setAttribute('aria-label',(k+1)+'번 '+(on?'답함':'안 풂'))}}
 function qAnswered(){var c=0;if(Q&&Q.questions)Q.questions.forEach(function(q,i){if(qs.ans[i]!=null&&String(qs.ans[i]).trim()!=='')c++});return c}
 function qGrade(i){var q=Q.questions[i],a=qs.ans[i];if(a==null||String(a)==='')return false;
   if(q.type==='choice')return Number(a)===q.answer;
@@ -672,7 +723,9 @@ function qCounting(){return !!(Q&&Q.status==='open'&&!Q.questions)}
 function qDelay(){
   /* 카운트다운 중: 공개 시각에 맞춰(0~0.3초 어긋나게) 바로 받고, 아직 안 왔으면 0.4초마다 다시 */
   if(qCounting()){var w=Q.openedAt-sNow();return w>0?Math.min(w,4000)+Math.random()*300:400}
-  var s=Q?Q.status:'off';return(s==='ready'?4:s==='open'?6:s==='closed'?6:30)*1000*(0.75+Math.random()*0.5)}
+  var s=Q?Q.status:'off';
+  if(tab!=='quiz')return 20000*(0.75+Math.random()*0.5); // 다른 탭: 20초마다 알림용으로만 확인 (CDN이 받아 줌)
+  return(s==='ready'?4:s==='open'?6:s==='closed'?6:30)*1000*(0.75+Math.random()*0.5)}
 function qErrText(e){return{duplicate:'이 학번으로 이미 제출된 답이 있어요. 담임 선생님께 알려 주세요.',closed:'마감되어 제출되지 않았어요.',stale:'퀴즈가 새로 시작됐어요. 화면을 새로고침해 주세요.',bad_sid:'학번을 확인해 주세요.',bad_name:'이름을 확인해 주세요.',full:'제출이 가득 찼어요. 선생님께 알려 주세요.'}[e]||('제출하지 못했어요('+e+').')}
 function qBackupBtn(){var u=S.quizBackup||'';return /^https:\/\//.test(u)?'<a class="btn small primary" href="'+esc(u)+'" target="_blank" rel="noopener">예비 제출 열기</a>':''}
 function qRetryLater(){
@@ -720,7 +773,7 @@ function qDone(){
   var d=new Date(qs.submitted.at),t=isNaN(d)?'':String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
   var shown=Q.status==='closed'&&Q.reveal;
   return '<div class="card qdone"><span class="tag">제출 완료</span><div class="qcode mono">'+esc(qs.submitted.code)+'</div><p style="margin:0">접수 번호예요. 상품을 받을 때 이 화면을 보여 줘요.</p>'+
-   '<p class="callout">'+esc(qme.sid)+' '+esc(qme.name)+(t?' · '+t+' 접수':'')+'</p>'+(shown?'':'<p style="margin:0;color:var(--muted)">점수와 정답은 선생님이 공개하면 이 화면에 나와요.</p>')+'</div>'}
+   '<p class="callout">'+esc(qme.sid)+' '+esc(qme.name)+(t?' · '+t+' 접수':'')+'</p>'+(shown?'':'<p style="margin:0;color:var(--muted)">점수와 정답은 선생님이 공개하면 이 화면에 나와요. 순위는 마감 후 큰 화면에서 발표해요.</p>')+'</div>'}
 function qQuestions(){
   if(!Q.questions)return '<div class="card"><p class="callout">문제를 불러오는 중이에요…</p></div>';
   var lock=qs.pending||!!qs.submitted;
@@ -734,10 +787,14 @@ function qQuestions(){
     }else{
       body+='<input class="qshort" data-qa="'+i+'" value="'+esc(qs.ans[i]==null?'':qs.ans[i])+'" maxlength="50" autocomplete="off" autocapitalize="off" placeholder="답을 적어요" aria-label="'+(i+1)+'번 답"'+(lock?' disabled':'')+'>';
     }
-    return '<div class="card qcard"><h3>'+(i+1)+'번</h3>'+body+'</div>'}).join('');
+    return '<div class="card qcard" id="qq-'+i+'"><h3>'+(i+1)+'번</h3>'+body+'</div>'}).join('');
+  var n=Q.questions.length,an=qAnswered();
+  /* 위쪽에 고정되는 진행 막대 + 번호 칩 (푼 문제는 파란색, 누르면 그 문제로 이동) */
+  var prog='<div class="qprog"><div class="qmeter" role="progressbar" aria-label="푼 문제" aria-valuemin="0" aria-valuemax="'+n+'" aria-valuenow="'+an+'"><i id="qmeterfill" style="width:'+Math.round(an*100/n)+'%"></i></div><div class="qchips">'+
+    Q.questions.map(function(q,i){var on=qs.ans[i]!=null&&String(qs.ans[i]).trim()!=='';return '<button class="qchip'+(on?' on':'')+'" data-qjump="'+i+'" aria-label="'+(i+1)+'번 '+(on?'답함':'안 풂')+'">'+(i+1)+'</button>'}).join('')+'</div></div>';
   var bar='<div class="qspace"></div><div class="qbar"><div><span id="qcount">'+qAnswered()+' / '+Q.questions.length+' 답함</span><button class="btn primary" data-act="qsubmit"'+(lock?' disabled':'')+'>'+(qs.pending?'보내는 중…':'제출하기')+'</button></div></div>';
   var ban=qs.pending?qPendingBox():(qs.err?'<div class="card"><p class="err" role="alert">'+esc(qErrText(qs.err))+'</p>'+(qs.err==='closed'?qBackupBtn():'')+'</div>':'');
-  return ban+cards+bar;
+  return prog+ban+cards+bar;
 }
 function qResult(){
   var n=Q.questions.length,sc=0,rows=Q.questions.map(function(q,i){
@@ -754,20 +811,21 @@ setInterval(function(){var e=document.getElementById('qcd');if(e&&Q&&qCounting()
 function vQuiz(){
   var out='<div class="sec-h"><h2>퀴즈</h2><p>선생님이 시작하면 문제가 열려요. 끝까지 풀고 한 번만 제출해요.</p></div>';
   if(!(qs.submitted&&Q&&qs.id===Q.id))out+=qBackupBox();
-  if(!Q||!Q.id||Q.status==='off')return out+'<div class="card"><h3>지금은 퀴즈가 없어요</h3><p class="callout">퀴즈 시간이 되면 이 화면에 문제가 나와요. 선생님 안내를 기다려 주세요.</p></div>';
+  if(!Q||!Q.id||Q.status==='off')return out+'<div class="card qhero"><span class="em" aria-hidden="true">🎯</span><h3>지금은 퀴즈가 없어요</h3><p style="margin:0;color:var(--muted)">퀴즈 시간이 되면 선생님이 열어 줘요.<br>열리면 다른 탭에서도 위쪽에 알림이 떠요.</p></div>';
   var mine=qs.id===Q.id;
   if(mine&&qs.submitted)out+=qDone();
   else if(Q.status==='closed')out+=(qs.pending?qPendingBox():'<div class="card"><h3>퀴즈가 마감됐어요</h3>'+(qs.err?'<p class="err">'+esc(qErrText(qs.err))+'</p>':'')+'<p class="callout">제출하지 못했다면 선생님께 알려 주세요.</p>'+qBackupBtn()+'</div>');
   else if(!qIdOk()||!qme.ok)out+=(qCounting()?qCountCard():'')+qIdForm();
   else if(qCounting())out+=qCountCard();
-  else if(Q.status==='ready')out+='<div class="card qdone"><span class="tag">준비 완료</span><h3>'+esc(qme.sid)+' '+esc(qme.name)+'</h3><p style="margin:0">선생님이 시작하면 문제가 바로 떠요. 이 화면에서 기다려 주세요.</p><button class="btn small" data-act="qedit">학번·이름 고치기</button></div>';
+  else if(Q.status==='ready')out+='<div class="card qdone"><span class="tag">준비 완료</span><h3>'+esc(qme.sid)+' '+esc(qme.name)+'</h3><p style="margin:0">선생님이 시작하면 문제가 바로 떠요. 이 화면에서 기다려 주세요.</p><p class="callout" style="text-align:left">문제 <b>'+(Q.n||0)+'개</b> · 시작하면 <b>10초 뒤 모두에게 동시에</b> 열려요<br>순위: 점수 높은 순 → 같으면 <b>빨리 낸 순</b> · 다 풀고 한 번만 제출해요</p><button class="btn small" data-act="qedit">학번·이름 고치기</button></div>';
   else out+=qQuestions();
-  if(Q.status==='closed'&&Q.reveal&&Q.questions&&Q.questions[0]&&Q.questions[0].answer!=null)out+=qResult();
+  if(Q.status==='closed'&&Q.reveal&&Q.questions&&Q.questions[0]&&Q.questions[0].answer!=null){out+=qResult();if(mine&&!qs.seenRes){qs.seenRes=true;lsSet(LSQ,qs)}}
   return out;
 }
 
 /* ---------- 퀴즈 (선생님) ---------- */
-var qa={loaded:false,loading:false,failed:false,state:null,draft:null,busy:false,msg:'',health:'',count:null,results:null,timer:0};
+var etab=lsGet('hanumul2026-etab','quiz'); // 수정 화면에서 마지막으로 본 탭
+var qa={hasDef:false,editOpen:false,loaded:false,loading:false,failed:false,state:null,draft:null,busy:false,msg:'',health:'',count:null,results:null,timer:0};
 function qapi(body){body.password=adminPw;return api(body,QAPI)}
 function qToDraft(def){return{title:def.title||'',questions:def.questions.map(function(q){return{type:q.type,text:q.text||'',img:q.img||'',choices:(q.choices||[]).slice(),answer:q.type==='choice'?q.answer:0,ans:q.type==='short'?(q.answer||[]).join(', '):''}})}}
 function qBlank(){return{type:'choice',text:'',img:'',choices:['','','',''],answer:0,ans:''}}
@@ -782,7 +840,7 @@ function qaReset(){qa.loaded=false;qa.failed=false;qa.msg='';qa.results=null}
 function qaLoad(){
   qa.loading=true;
   qapi({action:'qget'}).then(function(r){qa.loading=false;
-    if(r.ok){qa.loaded=true;qa.failed=false;qa.state=r.state;qa.draft=r.def?qToDraft(r.def):{title:'',questions:[]};qaTimer()}else{qa.failed=true;qa.msg=errText(r.error)}
+    if(r.ok){qa.loaded=true;qa.failed=false;qa.state=r.state;qa.hasDef=!!r.def;qa.editOpen=!r.def||!r.state.id||r.state.status==='off';qa.draft=r.def?qToDraft(r.def):{title:'',questions:[]};qaTimer()}else{qa.failed=true;qa.msg=errText(r.error)}
     if(mode==='edit')render();
     if(r.ok&&(r.state.status==='open'||r.state.status==='closed'))qaResults(true); // 진행·마감 중이면 순위표를 바로 보여 줌
   }).catch(function(){qa.loading=false;qa.failed=true;qa.msg=errText('network');if(mode==='edit')render()});
@@ -807,15 +865,15 @@ function qaSave(){
     if(q.type==='short'&&!String(q.ans||'').replace(/[,\s]/g,'')){qa.msg=(i+1)+'번 문제의 인정하는 답을 적어 주세요.';render();return}
   }
   qa.busy=true;qa.msg='저장 중…';render();
-  qapi({action:'qsave',def:qaDef()}).then(function(r){qa.busy=false;qa.msg=r.ok?'퀴즈를 저장했어요.':errText(r.error);render()}).catch(function(){qa.busy=false;qa.msg=errText('network');render()});
+  qapi({action:'qsave',def:qaDef()}).then(function(r){qa.busy=false;if(r.ok)qa.hasDef=true;qa.msg=r.ok?'퀴즈를 저장했어요.'+(qa.state&&qa.state.status==='ready'?'':' 위의 "대기 열기"를 누르면 학생들이 참여할 수 있어요.'):errText(r.error);render()}).catch(function(){qa.busy=false;qa.msg=errText('network');render()});
 }
 function qaStatus(body,ask){
   if(qa.busy)return;if(ask&&!confirm(ask))return;
   qa.busy=true;qa.msg='처리 중…';render();
   qapi(body).then(function(r){qa.busy=false;
-    if(r.ok){qa.state=r.state;if(body.action==='qnew'){qa.results=null;qa.count=0}
+    if(r.ok){qa.state=r.state;if(body.action==='qnew'||body.action==='qreset'){qa.results=null;qa.count=0}
       qa.msg=body.status==='closed'?'마감했어요. 아래 순위표를 확인한 뒤 "결과 공개"를 눌러 주세요. (마감 뒤 2분 동안 늦게 도착한 제출이 더 들어올 수 있어요)':
-        body.reveal===true?'학생 화면에 점수와 정답을 공개했어요. 몇 초 안에 나타나요.':'반영했어요. 학생 화면에는 몇 초 안에 나타나요.'}else qa.msg=errText(r.error);
+        body.reveal===true?'학생 화면에 점수와 정답을 공개했어요. 몇 초 안에 나타나요.':body.action==='qreset'?'제출 기록을 지우고 대기 상태로 돌아갔어요. 학생 휴대폰도 몇 초 안에 다시 풀 수 있게 바뀌어요.':body.status==='open'?'시작했어요! 10초 뒤 모든 학생에게 문제가 열려요.':'반영했어요. 학생 화면에는 몇 초 안에 나타나요.'}else qa.msg=errText(r.error);
     render();
     if(r.ok&&(body.status==='closed'||body.status==='open'))qaResults(true); // 마감하면 순위표가 바로 뜸
   }).catch(function(){qa.busy=false;qa.msg=errText('network');render()});
@@ -942,25 +1000,51 @@ function bdConfetti(power){
     if(fx.p.length)requestAnimationFrame(tick);else{g.clearRect(0,0,W,H);fx.on=false}
   })();
 }
+setInterval(function(){if(mode!=='edit')return;var e=document.getElementById('qa-el');if(e&&qa.state)e.textContent=bdElapsed(qa.state)},1000); // 선생님 퀴즈 화면의 경과 시간
 setInterval(function(){
   if(mode!=='board')return;
   var e=document.getElementById('bd-el');if(e&&bd.R)e.textContent=bdElapsed(bd.R.state||qa.state);
   if(Date.now()-bd.last>5000&&!document.hidden)bdLoad();
 },1000);
+/* 선생님 퀴즈 화면: ①~⑤ 단계 표시 + 지금 누를 버튼 하나 + 순위표 + (접어 둔) 문제 편집 + 도구 */
+function qaStepInfo(){
+  var st=qa.state||{},s=st.status;
+  if(!qa.hasDef)return{i:0,act:'qaeditopen',btn:'문제 만들기',desc:'기본 문제 5개를 불러오거나 직접 만든 뒤 "퀴즈 저장"을 눌러요.'};
+  if(!st.id||s==='off')return{i:1,act:'qaready2',btn:'대기 열기',desc:'학생 퀴즈 탭에 학번·이름 입력칸이 열려요. 문제는 아직 보이지 않아요.'};
+  if(s==='ready')return{i:1,cur:true,act:'qaopen',btn:'▶ 시작',desc:'누르면 10초 카운트다운 뒤 모든 학생에게 동시에 문제가 열려요. 큰 화면에서도 같이 세어 주세요.'};
+  if(s==='open')return{i:2,act:'qaclose',btn:'■ 마감',desc:'더 이상 제출을 받지 않아요. (통신 때문에 늦게 도착한 제출은 2분까지 받아요)'};
+  if(!st.reveal)return{i:3,act:'qareveal',btn:'결과 공개',desc:'아래 순위표를 확인한 뒤 누르면 학생 화면에 각자의 점수와 정답이 나와요.'};
+  return{i:4,done:true,act:'qareset',btn:'처음부터 다시',desc:'제출 기록을 지우고 대기 상태로 돌아가요. 연습을 다시 해 볼 때 써요.'};
+}
 function quizCard(){
   if(!qa.loaded){
     if(!qa.loading&&!qa.failed)qaLoad();
-    return '<div class="card"><h3>퀴즈</h3><p class="callout">'+(qa.failed?esc(qa.msg||'불러오지 못했어요.'):'불러오는 중…')+'</p>'+(qa.failed?'<button class="btn small" data-act="qaretry">다시 불러오기</button><p class="callout">퀴즈 진행 중에 이 오류가 계속되면: 아래 <b>기본 정보 → 퀴즈 예비 제출 안내</b>를 "켜기"로 바꾸고 저장하세요. 학생 화면에 예비 제출 버튼이 떠요. (학생들의 답은 휴대폰에 남아 서버가 돌아오면 자동으로 다시 제출돼요)</p>':'')+'</div>';
+    return '<div class="card"><h3>퀴즈</h3><p class="callout">'+(qa.failed?esc(qa.msg||'불러오지 못했어요.'):'불러오는 중…')+'</p>'+(qa.failed?'<button class="btn small" data-act="qaretry">다시 불러오기</button><p class="callout">퀴즈 진행 중에 이 오류가 계속되면: <b>안내·공지</b> 탭 → 기본 정보 → <b>퀴즈 예비 제출 안내</b>를 "켜기"로 바꾸고 저장하세요. 학생 화면에 예비 제출 버튼이 떠요. (학생들의 답은 휴대폰에 남아 서버가 돌아오면 자동으로 다시 제출돼요)</p>':'')+'</div>';
   }
-  var st=qa.state,s=st.status,has=!!st.id,d=qa.draft,locked=(s==='open'||s==='closed');
-  var label={off:'숨김',ready:'대기 중 (학생이 학번을 입력하는 단계)',open:'진행 중',closed:'마감'}[s];
-  if(s==='open'&&st.openedAt){var od=new Date(st.openedAt);label+=' · 문제 공개 '+String(od.getHours()).padStart(2,'0')+':'+String(od.getMinutes()).padStart(2,'0')+':'+String(od.getSeconds()).padStart(2,'0')+' (이 시각부터 걸린 시간을 재요)'}
-  var ctl='';
-  if(!has||s==='off')ctl+='<button class="btn primary" data-act="qanew">새 회차 만들고 대기 열기</button>';
-  if(has&&s==='off')ctl+='<button class="btn" data-act="qaready">대기 다시 열기</button>';
-  if(s==='ready')ctl+='<button class="btn primary" data-act="qaopen">▶ 시작</button><button class="btn" data-act="qaoff">퀴즈 숨기기</button>';
-  if(s==='open')ctl+='<button class="btn primary" data-act="qaclose">■ 마감</button>';
-  if(s==='closed')ctl+='<button class="btn primary" data-act="qareveal">'+(st.reveal?'결과 숨기기':'결과 공개')+'</button><button class="btn" data-act="qareopen">다시 열기</button><button class="btn" data-act="qanew">새 회차</button><button class="btn" data-act="qaoff">퀴즈 숨기기</button>';
+  var st=qa.state,s=st.status,d=qa.draft,locked=(s==='open'||s==='closed'),P=qaStepInfo();
+  /* ① 단계 표시 */
+  var names=['문제 준비','학번 입력','퀴즈 진행','마감·확인','결과 공개'];
+  var steps='<ol class="qsteps" aria-label="퀴즈 진행 단계">'+names.map(function(n,i){
+    var c=(i<P.i||(P.done&&i===P.i))?'done':(i===P.i?'cur':'');
+    return '<li class="qstep '+c+'"'+(c==='cur'?' aria-current="step"':'')+'><b>'+(c==='done'?'✓':(i+1))+'</b>'+n+'</li>'}).join('')+'</ol>';
+  /* 지금 상황 */
+  var now=[];
+  now.push('<span>'+({off:'숨김',ready:'대기 중',open:'진행 중',closed:'마감'}[s]||'숨김')+(s==='closed'?(st.reveal?' · 결과 공개 중':' · 결과 공개 전'):'')+'</span>');
+  if(s==='open'||s==='closed')now.push('<span>제출 <b id="qcount-a">'+(qa.count==null?'…':qa.count)+'</b>명</span>');
+  if((s==='open'||s==='closed')&&st.openedAt){var od=new Date(st.openedAt);now.push('<span>공개 <b>'+String(od.getHours()).padStart(2,'0')+':'+String(od.getMinutes()).padStart(2,'0')+':'+String(od.getSeconds()).padStart(2,'0')+'</b> · 경과 <b id="qa-el">'+bdElapsed(st)+'</b></span>')}
+  /* 보조 버튼 */
+  var sub=[];
+  if(s==='closed'){sub.push('<button class="btn small" data-act="qareopen">다시 열기</button>');if(st.reveal&&P.act!=='qareveal')sub.push('<button class="btn small" data-act="qareveal">결과 숨기기</button>')}
+  if(s==='ready'||s==='closed')sub.push('<button class="btn small" data-act="qaoff">퀴즈 숨기기</button>');
+  if(st.id&&P.act!=='qareset'&&qa.hasDef)sub.push('<button class="btn small warn" data-act="qareset">처음부터 다시 (제출 기록 지우기)</button>');
+  var main='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3>퀴즈 진행</h3><div class="qnow">'+now.join('')+'</div></div>'+steps+
+    '<div class="qnext"><button class="btn primary big" data-act="'+P.act+'"'+(qa.busy?' disabled':'')+'>'+P.btn+'</button><p style="margin:0;color:var(--muted);font-size:14px">'+P.desc+'</p></div>'+
+    (sub.length?'<div style="display:flex;gap:6px;flex-wrap:wrap">'+sub.join('')+'</div>':'')+
+    (qa.msg?'<p class="callout" role="status">'+esc(qa.msg)+'</p>':'')+
+    '<p style="margin:0;font-size:13px;color:var(--muted)">이 화면의 버튼은 누르는 즉시 서버에 반영되고, 학생 화면에는 몇 초 안에 나타나요.</p></div>';
+  /* 순위표 (선생님만) */
+  var rank=(st.id&&(s==='open'||s==='closed'||qa.results))?'<div class="card"><div id="qa-res">'+qaResHtml()+'</div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn primary" data-act="qaboard">큰 화면 순위표 열기</button><span style="font-size:13px;color:var(--muted)">프로젝터용 · 이 로그인 화면에서만 열려요</span></div></div>':'';
+  /* 문제 (기본은 접어 둠) */
   var qh=d.questions.map(function(q,i){
     var im=q.img?'<div><img src="'+QAPI+'?img='+esc(q.img)+'" alt=""></div><button class="btn small" data-qdimgdel="'+i+'"'+(locked?' disabled':'')+'>그림 빼기</button>':'<input type="file" accept="image/*" data-qimg="'+i+'" aria-label="그림 고르기"'+(locked?' disabled':'')+'>';
     var opt;
@@ -971,22 +1055,19 @@ function quizCard(){
     return '<div class="qedit"><div class="ops" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><b>'+(i+1)+'번</b><select data-qtype="'+i+'" aria-label="'+(i+1)+'번 종류"'+(locked?' disabled':'')+'><option value="choice"'+(q.type==='choice'?' selected':'')+'>객관식</option><option value="short"'+(q.type==='short'?' selected':'')+'>단답형</option></select><span class="sp" style="flex:1"></span>'+
       '<button class="btn small" data-qdmv="'+i+':-1"'+(locked||i===0?' disabled':'')+'>위로</button><button class="btn small" data-qdmv="'+i+':1"'+(locked||i===d.questions.length-1?' disabled':'')+'>아래로</button><button class="btn small" data-qddel="'+i+'"'+(locked?' disabled':'')+'>삭제</button></div>'+
       '<div class="field"><label for="qa-t'+i+'">문제 글 (비우면 학생 휴대폰에는 번호와 답안칸만 나와요)</label><textarea id="qa-t'+i+'" data-qd="'+i+'" data-k="text" style="min-height:80px"'+(locked?' disabled':'')+'>'+esc(q.text)+'</textarea></div>'+im+opt+'</div>'}).join('');
-  return '<div class="card"><h3>퀴즈</h3>'+
-    '<p class="callout">현재 상태: <b>'+label+'</b>'+(s==='open'||s==='closed'?' · 제출 <b id="qcount-a">'+(qa.count==null?'…':qa.count)+'</b>명':'')+'</p>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+ctl+'</div>'+
-    '<p class="callout">흐름: 새 회차(대기) → 학생이 학번 입력 → ▶ 시작 → ■ 마감 → <b>순위표 확인</b> → 결과 공개. 이 카드의 버튼은 누르는 즉시 서버에 반영되고, 학생 화면에는 몇 초 안에 나타나요. (맨 아래 "저장" 버튼은 누를 필요 없어요)</p>'+
-    (qa.msg?'<p class="callout" role="status">'+esc(qa.msg)+'</p>':'')+
-    '<div id="qa-res">'+qaResHtml()+'</div>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn primary" data-act="qaboard">큰 화면 순위표 열기</button><span style="font-size:13px;color:var(--muted)">프로젝터용. 이 로그인 화면에서만 열려요</span></div>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn small" data-act="qahealth">서버 점검</button><span style="font-size:13px;color:var(--muted)">행사 전과 시작 직전에 눌러 확인해요</span></div>'+
+  var edit='<div class="card" id="qa-edit"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3>문제 <span style="font-weight:400;color:var(--muted);font-size:14px">'+d.questions.length+'개'+(qa.hasDef?'':' · 아직 저장 안 됨')+'</span></h3>'+
+    '<button class="btn small" data-act="qaedit">'+(qa.editOpen?'접기':(locked?'문제 보기':'문제 보기·고치기'))+'</button></div>'+
+    (qa.editOpen?(locked?'<p class="callout">진행·마감 중에는 문제를 고칠 수 없어요. "처음부터 다시"를 누르면 고칠 수 있어요.</p>':'')+
+      '<div class="field"><label for="qa-title">퀴즈 제목 (큰 화면 순위표에 나와요)</label><input id="qa-title" data-qt="1" maxlength="60" value="'+esc(d.title)+'"'+(locked?' disabled':'')+'></div>'+
+      '<div class="erows">'+qh+'</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-act="qdadd"'+(locked||d.questions.length>=30?' disabled':'')+'>문제 추가</button><button class="btn" data-act="qasample"'+(locked?' disabled':'')+'>기본 문제 5개 불러오기</button><button class="btn primary" data-act="qasave"'+(locked||qa.busy?' disabled':'')+'>퀴즈 저장</button></div>'+
+      '<p class="callout">객관식은 보기 2~5개, 단답형은 인정하는 답을 쉼표로 여러 개 적을 수 있어요. 띄어쓰기·대소문자·문장부호 차이는 무시하고 채점해요. 그림은 자동으로 줄여서 올려요(문제 그림은 합쳐서 1MB 이하 권장).</p>':'')+'</div>';
+  /* 도구 */
+  var tools='<div class="card"><h3>도구</h3><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn small" data-act="qahealth">서버 점검</button><a class="btn small" href="./#quiz" target="_blank" rel="noopener">학생 화면 미리보기 (새 창)</a></div>'+
     (qa.health?'<p class="callout" style="white-space:pre-line">'+esc(qa.health)+'</p>':'')+
-    '<p class="callout">퀴즈 서버가 안 될 때: 아래 <b>기본 정보 → 퀴즈 예비 제출 안내</b>를 "켜기"로 바꾸고 저장하면 1~3분 안에 학생 퀴즈 화면에 예비 제출(구글 설문) 버튼이 크게 떠요. 이 방법은 퀴즈 서버와 상관없이 작동해요.</p>'+
-    '<h3 style="margin-top:6px">문제 만들기'+(locked?' <span style="font-weight:400;color:var(--muted);font-size:14px">(진행·마감 중에는 고칠 수 없어요. 새 회차를 만들면 고칠 수 있어요)</span>':'')+'</h3>'+
-    '<div class="field"><label for="qa-title">퀴즈 제목 (선택)</label><input id="qa-title" data-qt="1" maxlength="60" value="'+esc(d.title)+'"'+(locked?' disabled':'')+'></div>'+
-    '<div class="erows">'+qh+'</div>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-act="qdadd"'+(locked||d.questions.length>=30?' disabled':'')+'>문제 추가</button><button class="btn" data-act="qasample"'+(locked?' disabled':'')+'>기본 문제 5개 불러오기</button><button class="btn primary" data-act="qasave"'+(locked||qa.busy?' disabled':'')+'>퀴즈 저장</button></div>'+
-    '<p class="callout">객관식은 보기 2~5개, 단답형은 인정하는 답을 쉼표로 여러 개 적을 수 있어요. 띄어쓰기·대소문자·문장부호 차이는 무시하고 채점해요. 그림은 휴대폰에서 자동으로 줄여서 올려요(문제 그림은 합쳐서 1MB 이하 권장).</p>'+
-    '</div>';
+    '<p class="callout">서버 점검은 행사 전과 시작 직전에 눌러 확인해요. 학생 화면 미리보기는 로그인하지 않은 학생 화면이 새 창으로 열려요.</p>'+
+    '<p class="callout">퀴즈 서버가 안 될 때: <b>안내·공지</b> 탭 → 기본 정보 → <b>퀴즈 예비 제출 안내</b>를 "켜기"로 바꾸고 저장하면 1~3분 안에 학생 퀴즈 화면에 예비 제출(구글 설문) 버튼이 크게 떠요. 이 방법은 퀴즈 서버와 상관없이 작동해요.</p></div>';
+  return main+rank+edit+tools;
 }
 
 /* ---------- login ---------- */
@@ -1002,6 +1083,9 @@ function errText(e){return{wrong_password:'비밀번호가 맞지 않아요.',no
 /* ---------- editor ---------- */
 function renderEditor(){
   var d=draft;
+  /* 맨 위 탭: [안내·공지 | 퀴즈]. 퀴즈 탭에는 맨 아래 저장 바가 없어서 헷갈리지 않음 */
+  var etabs='<div class="etabs"><button class="chipbtn" data-etab="info" aria-pressed="'+(etab==='info')+'">안내·공지 수정</button><button class="chipbtn" data-etab="quiz" aria-pressed="'+(etab==='quiz')+'">퀴즈</button><span class="sp"></span><button class="btn small" data-act="cancel">나가기</button></div>';
+  if(etab==='quiz'){app.innerHTML='<div class="wrap plain"><div class="editor" style="padding-bottom:32px">'+etabs+quizCard()+'</div></div>';return}
   var rows=d.program.map(function(p,i){return'<div class="erow eprog">'+
     '<div class="field w-type"><label for="p'+i+'-type">구분</label><input id="p'+i+'-type" list="types" data-p="'+i+'" data-k="type" value="'+esc(p.type)+'"></div>'+
     '<div class="field"><label for="p'+i+'-title">프로그램 내용</label><input id="p'+i+'-title" data-p="'+i+'" data-k="title" value="'+esc(p.title)+'"></div>'+
@@ -1017,9 +1101,9 @@ function renderEditor(){
     '<div class="ops"><span>'+(p.x!=null?'지도에 표시됨':'아직 지도에 없음')+'</span><span class="sp"></span><button class="btn small'+(placing===i?' primary':'')+'" data-place="'+i+'">'+(placing===i?'지도를 눌러 주세요':'지도에서 위치 찍기')+'</button>'+(p.x!=null?'<button class="btn small" data-unplace="'+i+'">위치 지우기</button>':'')+'<button class="btn small" data-mdel="'+i+'">삭제</button></div></div>'}).join('');
   function f(id,label,val,type){return'<div class="field"><label for="'+id+'">'+label+'</label><input id="'+id+'" type="'+(type||'text')+'" data-s="'+id.slice(2)+'" value="'+esc(val)+'"></div>'}
   function ta(key,label){return'<div class="field"><label for="t-'+key+'">'+label+' (한 줄에 하나씩)</label><textarea id="t-'+key+'" data-l="'+key+'">'+esc((d[key]||[]).join('\n'))+'</textarea></div>'}
-  app.innerHTML='<div class="wrap plain"><div class="editor">'+
+  app.innerHTML='<div class="wrap plain"><div class="editor">'+etabs+
    '<div class="sec-h"><h2>식순·안내 수정</h2><p>맨 위 공지는 바로 보내져요. 아래 내용은 저장하면 사이트가 새로 배포되고(약 1분), 학생 화면에는 그 뒤 3분 안에 반영돼요.</p></div>'+
-   annCard()+quizCard()+
+   annCard()+
    '<div class="card"><h3>기본 정보</h3><div class="grid2">'+f('s-date','행사 날짜',d.date,'date')+f('s-venue','장소',d.venue)+f('s-start','공연 시작',d.start,'time')+f('s-morningTime','아침 집결 시각',d.morningTime,'time')+f('s-morningPlace','아침 집결 장소',d.morningPlace)+f('s-meetTime','퇴장 집결 시각 (체험 종료)',d.meetTime,'time')+f('s-meetPlace','퇴장 집결 장소',d.meetPlace)+f('s-homeNote','귀가 방법',d.homeNote)+f('s-quizBackup','퀴즈 예비 제출 주소 (구글 설문 링크, 선택)',d.quizBackup||'')+
    '<div class="field"><label for="s-quizBackupOn">퀴즈 예비 제출 안내 (퀴즈 서버 장애 때만 켜기)</label><select id="s-quizBackupOn" data-s="quizBackupOn"><option value=""'+(d.quizBackupOn==='on'?'':' selected')+'>끄기 (평소)</option><option value="on"'+(d.quizBackupOn==='on'?' selected':'')+'>켜기 → 학생 화면에 예비 제출 버튼</option></select></div></div></div>'+
    '<div class="card"><h3>비상 연락처</h3><div class="erows">'+crow+'</div><button class="btn" data-act="cadd">연락처 추가</button></div>'+
@@ -1153,6 +1237,7 @@ app.addEventListener('click',function(ev){
   var b=ev.target.closest('button');if(!b)return;
   if(b.dataset.tab){tab=b.dataset.tab;try{history.replaceState(null,'','#'+tab)}catch(e){}render();window.scrollTo({top:0});if(tab==='quiz')qLoad();return}
   /* 퀴즈: 학생 */
+  if(b.dataset.qjump!=null){var qe=document.getElementById('qq-'+b.dataset.qjump);if(qe)window.scrollTo({top:qe.getBoundingClientRect().top+window.scrollY-150,behavior:'smooth'});return}
   if(b.dataset.qc!=null){if(qs.pending||qs.submitted)return;var qc=b.dataset.qc.split(':');qs.ans[+qc[0]]=qc[1];lsSet(LSQ,qs);
     var sib=b.parentNode.children;for(var si=0;si<sib.length;si++)sib[si].setAttribute('aria-pressed',sib[si]===b?'true':'false');qCount();return}
   if(b.dataset.act==='qready'){
@@ -1173,6 +1258,7 @@ app.addEventListener('click',function(ev){
     return}
   /* 퀴즈: 선생님 */
   if(b.dataset.act==='qaretry'){qa.failed=false;qa.msg='';render();return}
+  if(b.dataset.etab&&mode==='edit'){etab=b.dataset.etab;lsSet('hanumul2026-etab',etab);mapFull=false;render();window.scrollTo({top:0});return}
   if(b.dataset.act==='qaboard'&&mode==='edit'&&adminPw){mode='board';bd.R=null;bd.step=-1;bd.live=false;render();bdLoad();window.scrollTo({top:0});return}
   if(mode==='edit'&&qa.loaded){
     var qd=qa.draft,qp;
@@ -1184,6 +1270,10 @@ app.addEventListener('click',function(ev){
     if(b.dataset.qdimgdel!=null){qd.questions[+b.dataset.qdimgdel].img='';render();return}
     var qa2=b.dataset.act;
     if(qa2==='qdadd'){qd.questions.push(qBlank());render();return}
+    if(qa2==='qaedit'){qa.editOpen=!qa.editOpen;render();return}
+    if(qa2==='qaeditopen'){qa.editOpen=true;render();var qe2=document.getElementById('qa-edit');if(qe2)qe2.scrollIntoView({behavior:'smooth',block:'start'});return}
+    if(qa2==='qaready2'){if(!qa.state.id)qaStatus({action:'qreset'});else qaStatus({action:'qstatus',status:'ready'});return}
+    if(qa2==='qareset'){qaStatus({action:'qreset'},'처음부터 다시 할까요?\n\n지금까지 제출된 '+(qa.count||0)+'명의 기록이 지워지고, 학생 화면은 대기(학번 입력) 상태로 돌아가요. 학생 휴대폰도 다시 풀 수 있게 바뀌어요.');return}
     if(qa2==='qasample'){if(qd.questions.length&&!confirm('지금 만든 문제를 기본 문제 5개로 바꿀까요?'))return;qa.draft=JSON.parse(JSON.stringify(QUIZ_SAMPLE));qa.msg='기본 문제를 불러왔어요. 확인한 뒤 "퀴즈 저장"을 눌러 주세요.';render();return}
     if(qa2==='qasave'){qaSave();return}
     if(qa2==='qanew'){qaStatus({action:'qnew'},qa.state.id?'새 회차를 만들어요. 학생 화면은 학번 입력 단계로 돌아가고, 이전 회차 기록은 서버에 남아요. 계속할까요?':'');return}
@@ -1273,13 +1363,13 @@ setInterval(function(){if(mode==='view'&&tab!=='map'&&tab!=='quiz'&&!document.hi
 (function poll(){setTimeout(function(){if(!document.hidden)load();poll()},POLL_MS*(0.75+Math.random()*0.5))})();
 /* 퀴즈: 보고 있을 때만 상태 확인 (대기 4초 · 진행·마감 6초 · 숨김 30초, 사람마다 어긋나게. 카운트다운 중에는 공개 시각에 맞춰 받음). 제출 못 한 답은 다시 보냄 */
 var qPollT=0;
-function qSched(){clearTimeout(qPollT);qPollT=setTimeout(function(){if(tab==='quiz'&&mode==='view'&&!document.hidden)qLoad();qSched()},qDelay())} // 상태를 새로 받을 때마다 그 상태에 맞는 간격으로 다시 걺
+function qSched(){clearTimeout(qPollT);qPollT=setTimeout(function(){if(mode==='view'&&!document.hidden)qLoad();qSched()},qDelay())} // 상태를 새로 받을 때마다 그 상태에 맞는 간격으로 다시 걺
 qSched();
 function qResume(){if(qs.pending&&!qs.submitted&&!qFlight)qSubmit()}
-if(tab==='quiz')setTimeout(qLoad,Math.random()*1000);
+setTimeout(qLoad,tab==='quiz'?Math.random()*1000:500+Math.random()*2500); // 어느 탭이든 처음 한 번 확인 (다른 탭 알림용)
 if(qs.pending&&!qs.submitted)setTimeout(qResume,500+Math.random()*1500);
 var lastVis=0;
-document.addEventListener('visibilitychange',function(){if(!document.hidden){loadAnn();if(tab==='quiz'&&mode==='view')qLoad();qResume();if(Date.now()-lastVis>30000){lastVis=Date.now();load()}}});
+document.addEventListener('visibilitychange',function(){if(!document.hidden){loadAnn();if(mode==='view')qLoad();qResume();if(Date.now()-lastVis>30000){lastVis=Date.now();load()}}});
 window.addEventListener('online',function(){load();loadAnn();qResume()});
 window.addEventListener('offline',function(){online=false;if(mode==='view'&&tab!=='map'&&tab!=='quiz')render()});
 /* 오프라인 저장: 한 번 열면 다음부터는 통신이 안 돼도 열려요 */
