@@ -15,6 +15,7 @@ const crypto = require('crypto');
 const SID_RE = /^\d{5}$/;          // 학번 형식 (5자리 숫자). 학교 학번 규칙이 다르면 여기만 고치세요
 const GRACE_MS = 120 * 1000;       // 마감 뒤에도 재시도 중이던 제출을 받아 주는 시간
 const MAX_SUBS = 1000;             // 한 회차에 받을 최대 제출 수
+const COUNTDOWN_MS = 10 * 1000;    // ▶ 시작 후 문제 공개까지 카운트다운. 모든 휴대폰이 이 시각을 미리 알고 같은 순간에 문제를 받음
 const MAX_Q = 30;
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
@@ -149,9 +150,14 @@ module.exports = async function handler(req, res) {
         return res.status(200).send(Buffer.from(b64, 'base64'));
       }
       const pub = await getPub();
+      const now = Date.now();
+      const waiting = pub.status === 'open' && now < pub.openedAt; // 카운트다운 중에는 문제를 절대 내주지 않음
+      const out = Object.assign({}, pub, { now });
+      if (waiting) delete out.questions;
       res.setHeader('Cache-Control', 'public, max-age=1'); // 브라우저는 1초만 기억
-      res.setHeader('Vercel-CDN-Cache-Control', 'max-age=2, stale-if-error=600'); // 버셀 CDN은 2초, 서버 오류 때는 10분까지 마지막 정상 응답
-      return res.status(200).json(pub);
+      // 버셀 CDN은 평소 2초, 카운트다운 중에는 1초(공개 순간을 놓치지 않게). 서버 오류 때는 10분까지 마지막 정상 응답
+      res.setHeader('Vercel-CDN-Cache-Control', `max-age=${waiting ? 1 : 2}, stale-if-error=600`);
+      return res.status(200).json(out);
     }
 
     res.setHeader('Cache-Control', 'no-store');
@@ -173,7 +179,8 @@ module.exports = async function handler(req, res) {
       const [state, def] = await getSD();
       if (!def || !state.id || id !== state.id) return res.status(409).json({ ok: false, error: 'stale' });
       const now = Date.now();
-      const live = state.status === 'open' || (state.status === 'closed' && state.closedAt && now - state.closedAt <= GRACE_MS);
+      if (state.status === 'open' && now < state.openedAt) return res.status(409).json({ ok: false, error: 'closed' });
+      const live = state.status === 'open' ||(state.status === 'closed' && state.closedAt && now - state.closedAt <= GRACE_MS);
       if (!live) return res.status(409).json({ ok: false, error: 'closed' });
 
       const ans = Array.isArray(body.ans) ? body.ans.map((a) => String(a == null ? '' : a).slice(0, 50)) : null;
@@ -206,7 +213,11 @@ module.exports = async function handler(req, res) {
     forget(); // 선생님은 항상 최신 상태로
     const [state, def] = await getSD();
 
-    if (body.action === 'qget') return res.status(200).json({ ok: true, state, def });
+    if (body.action === 'qget') { // 수정 화면을 열 때마다 학생용 응답도 다시 만들어 둠 (혹시 어긋나 있어도 스스로 복구)
+      await pipe([['SET', K.pub, JSON.stringify(publicQuiz(state, def))]]);
+      forget();
+      return res.status(200).json({ ok: true, state, def });
+    }
 
     if (body.action === 'qhealth') { // 행사 전 점검: 저장소 응답 시간과 현재 제출 수
       const t0 = Date.now();
@@ -235,7 +246,7 @@ module.exports = async function handler(req, res) {
       if (body.status !== undefined) {
         if (!['off', 'ready', 'open', 'closed'].includes(body.status)) return res.status(400).json({ ok: false, error: 'bad_status' });
         if (body.status !== 'off' && (!def || !next.id)) return res.status(409).json({ ok: false, error: 'no_quiz' });
-        if (body.status === 'open' && !next.openedAt) next.openedAt = Date.now(); // 처음 시작한 시각만 기록 (다시 열어도 유지)
+        if (body.status === 'open' && !next.openedAt) next.openedAt = Date.now() + COUNTDOWN_MS; // 공개 예정 시각 = 순위 시간 기준. 처음 한 번만 기록 (다시 열어도 유지)
         if (body.status === 'closed' && next.status !== 'closed') next.closedAt = Date.now();
         next.status = body.status;
       }
