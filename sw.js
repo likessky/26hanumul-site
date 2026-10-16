@@ -4,7 +4,7 @@
  * 지도(map.jpg, 약 1MB)는 따로 보관해서 VERSION을 올려도 다시 받지 않아요.
  * 지도 이미지를 바꿀 때만 MAP_CACHE 숫자를 올려 주세요.
  */
-const VERSION = 'hanumul-v18';
+const VERSION = 'hanumul-v19';
 const MAP_CACHE = 'hanumul-map-1';
 const CORE = ['./', 'index.html', 'emblem.png', 'manifest.webmanifest', 'icon-192.png'];
 

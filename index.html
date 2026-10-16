@@ -244,6 +244,33 @@ footer{color:var(--muted);font-size:12px;text-align:center}
 .qid .field input{font-size:17px}
 .qedit{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--subtle);display:grid;gap:8px}
 .qedit img{max-width:220px;border-radius:8px;border:1px solid var(--line)}
+/* 큰 화면 순위표 (프로젝터용: 어두운 바탕 + 큰 글씨) */
+.board{position:fixed;inset:0;z-index:60;background:#0B0B10;color:#FFFFFF;overflow:auto;padding:clamp(12px,min(3vw,4vh),48px) clamp(16px,4vw,64px);display:grid;align-content:start;gap:clamp(8px,min(2vw,2.6vh),24px);--rowf:clamp(16px,min(3vw,3.8vh),48px)}
+.board.n5{--rowf:clamp(22px,min(4.4vw,7.5vh),72px)}.board.n20{--rowf:clamp(14px,min(2vw,2.3vh),32px)}
+.board h1{margin:0;font-size:clamp(26px,min(5vw,8vh),72px);line-height:1.15;font-weight:800;letter-spacing:-.02em;background:linear-gradient(45deg,var(--ig1),var(--ig2) 35%,var(--ig3) 62%,var(--ig4) 82%,var(--ig5));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;padding-right:clamp(0px,30vw,420px)}
+.bd-sub{font-size:clamp(14px,min(2.2vw,3.6vh),30px);color:#B8B8C0;font-weight:600}
+.bd-big{display:grid;justify-items:center;gap:8px;padding:clamp(20px,6vh,80px) 0;text-align:center}
+.bd-big b{font:800 clamp(64px,14vw,220px)/1 var(--f-mono)}
+.bd-big span{font-size:clamp(18px,2.6vw,36px);color:#B8B8C0;font-weight:600}
+.bd-list{display:grid;gap:calc(var(--rowf)*.22);margin:0;padding:0;list-style:none}
+.bd-row{display:grid;grid-template-columns:calc(var(--rowf)*2.2) minmax(0,1fr) auto auto;gap:calc(var(--rowf)*.6);align-items:center;background:#1B1B24;border-radius:calc(var(--rowf)*.35);padding:calc(var(--rowf)*.22) calc(var(--rowf)*.6);font-size:var(--rowf);line-height:1.25;font-weight:700}
+.bd-row .rk{font-family:var(--f-mono)}
+.bd-row .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bd-row .nm small{font-size:.6em;color:#B8B8C0;font-weight:600;margin-right:.5em}
+.bd-row .sc{color:#FFD166}
+.bd-row .tm{font-family:var(--f-mono);color:#D0D0D8;font-weight:600;font-size:.8em}
+.bd-row.r1{background:linear-gradient(90deg,#6B5212,#1B1B24 70%)}
+.bd-row.r2{background:linear-gradient(90deg,#4A4F5A,#1B1B24 70%)}
+.bd-row.r3{background:linear-gradient(90deg,#5E3A1C,#1B1B24 70%)}
+.bd-row.hid{color:#55555F;background:#141419}
+@media (prefers-reduced-motion:no-preference){.bd-row.pop{animation:pop .45s cubic-bezier(.34,1.56,.64,1)}}
+.bd-ctl{position:fixed;right:12px;top:12px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:min(560px,60vw);opacity:.3;transition:opacity .2s;z-index:61}
+.bd-ctl:hover,.bd-ctl:focus-within{opacity:1}
+@media (hover:none){.bd-ctl{opacity:1}}
+.board .btn,.board .chipbtn{background:#2A2A35;color:#FFFFFF}
+.board .chipbtn[aria-pressed="true"]{background:#FFFFFF;color:#0B0B10}
+.bd-hint{font-size:14px;color:#77777F}
+@media (max-width:640px){.bd-row{grid-template-columns:48px minmax(0,1fr) auto}.bd-row .tm{display:none}}
 </style>
 </head>
 <body>
@@ -509,6 +536,7 @@ function netChip(){
 function renderInner(){
   if(mode==='login')return renderLogin();
   if(mode==='edit')return renderEditor();
+  if(mode==='board')return renderBoard();
   var st=status(),v;
   if(tab!=='map')mapFull=false;
   if(tab==='schedule')v=vSchedule(st);else if(tab==='safety')v=vSafety();else if(tab==='map')v=vMap();else if(tab==='free')v=vFree(st);else if(tab==='quiz')v=vQuiz();else v=vHelp();
@@ -804,6 +832,48 @@ function qaResHtml(){
     (R.dups&&R.dups.length?'<p class="callout">같은 학번으로 다시 제출하려던 기록 '+R.dups.length+'건: '+R.dups.slice(0,10).map(function(x){return esc(x.sid)+' '+esc(x.name)}).join(', ')+'</p>':'');
 }
 function qaResPaint(){var e=document.getElementById('qa-res');if(e)e.innerHTML=qaResHtml()} // 순위표만 바꿔서 다른 입력칸은 그대로
+
+/* ---------- 큰 화면 순위표 (선생님 로그인 뒤 퀴즈 카드에서만 열림) ----------
+ * 5초마다 순위를 새로 받아 큰 글씨로 보여 줘요. 진행 중에는 기본으로 제출 수만, 마감 뒤 순위.
+ * "한 명씩 공개"를 누르면 아래 순위부터 스페이스바(또는 화면 클릭)로 하나씩 열어요. */
+var bd={n:10,step:-1,mask:false,live:false,R:null,busy:false,last:0};
+function bdLoad(){if(bd.busy)return;bd.busy=true;
+  qapi({action:'qresults'}).then(function(r){bd.busy=false;if(r.ok){bd.R=r;bd.last=Date.now();if(r.state)qa.state=r.state;if(mode==='board')render()}}).catch(function(){bd.busy=false});}
+function bdName(r){var nm=String(r.name||''),s=String(r.sid||'');
+  if(bd.mask&&nm.length>1)nm=nm.length===2?nm.charAt(0)+'*':nm.charAt(0)+'*'.repeat(nm.length-2)+nm.charAt(nm.length-1);
+  var cls=/^\d{5}$/.test(s)?(+s.charAt(0))+'학년 '+(+s.slice(1,3))+'반':s;
+  return '<small>'+esc(cls)+'</small>'+esc(nm)}
+function bdElapsed(st){if(!st||!st.openedAt)return'';var ms=(st.status==='closed'&&st.closedAt?st.closedAt:Date.now())-st.openedAt;if(ms<0)return Math.ceil(-ms/1000)+'초 후 공개';var s=Math.floor(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+function renderBoard(){
+  var R=bd.R,st=(R&&R.state)||qa.state||{},s=st.status,title=(R&&R.title)||'퀴즈';
+  var ctl='<div class="bd-ctl">'+[5,10,20].map(function(n){return'<button class="chipbtn" data-bdn="'+n+'" aria-pressed="'+(bd.n===n)+'">'+n+'명</button>'}).join('')+
+    '<button class="btn small" data-act="bdone">'+(bd.step>-1?'모두 보기':'한 명씩 공개')+'</button>'+
+    '<button class="btn small" data-act="bdmask">'+(bd.mask?'이름 보이기':'이름 가리기')+'</button>'+
+    (s==='open'?'<button class="btn small" data-act="bdlive">'+(bd.live?'진행 중 순위 숨기기':'진행 중 순위 보이기')+'</button>':'')+
+    '<button class="btn small" data-act="bdfull">전체 화면</button><button class="btn small" data-act="bdclose">닫기</button></div>';
+  var sub=s==='open'?'진행 중 · 제출 '+(R?R.total:'…')+'명':s==='closed'?'마감 · 제출 '+(R?R.total:'…')+'명 · 점수 높은 순, 같으면 빨리 낸 순':s==='ready'?'곧 시작해요':'';
+  var body;
+  if(!R)body='<div class="bd-big"><span>순위를 불러오는 중…</span></div>';
+  else if(s==='open'&&!bd.live)body='<div class="bd-big"><b id="bd-el">'+bdElapsed(st)+'</b><span>제출 '+R.total+'명</span></div>';
+  else if(!R.rows.length)body='<div class="bd-big"><span>아직 제출한 학생이 없어요</span></div>';
+  else{
+    var top=R.rows.slice(0,bd.n),N=top.length,M=['🥇','🥈','🥉'];
+    body='<ol class="bd-list">'+top.map(function(r,i){
+      var hidden=bd.step>-1&&i<N-bd.step;          // 한 명씩 공개: 아래 순위부터 열림
+      var fresh=bd.step>-1&&i===N-bd.step;
+      if(hidden)return'<li class="bd-row hid"><span class="rk">'+(i+1)+'</span><span class="nm">? ? ?</span><span class="sc"></span><span class="tm"></span></li>';
+      return'<li class="bd-row'+(i<3?' r'+(i+1):'')+(fresh?' pop':'')+'"><span class="rk">'+(i<3?M[i]:(i+1))+'</span><span class="nm">'+bdName(r)+'</span><span class="sc">'+r.score+'/'+R.n+'</span><span class="tm">'+(r.el/1000).toFixed(1)+'초</span></li>'}).join('')+'</ol>'+
+      (bd.step>-1&&bd.step<N?'<p class="bd-hint">스페이스바·→ 또는 화면을 누르면 다음 순위가 열려요 ('+bd.step+'/'+N+')</p>':'');
+  }
+  app.innerHTML='<div class="board n'+bd.n+'" id="board" role="region" aria-label="큰 화면 순위표">'+ctl+'<h1>'+esc(title)+'</h1><div class="bd-sub" id="bd-sub">'+sub+'</div>'+body+'</div>';
+}
+function bdNext(d){if(!bd.R||bd.step<0)return;var N=Math.min(bd.n,bd.R.rows.length);bd.step=Math.max(0,Math.min(N,bd.step+d));render()}
+function bdFull(){var el=document.documentElement;try{if(document.fullscreenElement)document.exitFullscreen();else if(el.requestFullscreen)el.requestFullscreen()}catch(e){}}
+setInterval(function(){
+  if(mode!=='board')return;
+  var e=document.getElementById('bd-el');if(e&&bd.R)e.textContent=bdElapsed(bd.R.state||qa.state);
+  if(Date.now()-bd.last>5000&&!document.hidden)bdLoad();
+},1000);
 function quizCard(){
   if(!qa.loaded){
     if(!qa.loading&&!qa.failed)qaLoad();
@@ -834,6 +904,7 @@ function quizCard(){
     '<p class="callout">흐름: 새 회차(대기) → 학생이 학번 입력 → ▶ 시작 → ■ 마감 → <b>순위표 확인</b> → 결과 공개. 이 카드의 버튼은 누르는 즉시 서버에 반영되고, 학생 화면에는 몇 초 안에 나타나요. (맨 아래 "저장" 버튼은 누를 필요 없어요)</p>'+
     (qa.msg?'<p class="callout" role="status">'+esc(qa.msg)+'</p>':'')+
     '<div id="qa-res">'+qaResHtml()+'</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn primary" data-act="qaboard">큰 화면 순위표 열기</button><span style="font-size:13px;color:var(--muted)">프로젝터용. 이 로그인 화면에서만 열려요</span></div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn small" data-act="qahealth">서버 점검</button><span style="font-size:13px;color:var(--muted)">행사 전과 시작 직전에 눌러 확인해요</span></div>'+
     (qa.health?'<p class="callout" style="white-space:pre-line">'+esc(qa.health)+'</p>':'')+
     '<p class="callout">퀴즈 서버가 안 될 때: 아래 <b>기본 정보 → 퀴즈 예비 제출 안내</b>를 "켜기"로 바꾸고 저장하면 1~3분 안에 학생 퀴즈 화면에 예비 제출(구글 설문) 버튼이 크게 떠요. 이 방법은 퀴즈 서버와 상관없이 작동해요.</p>'+
@@ -1000,6 +1071,7 @@ function load(){
 
 /* ---------- events ---------- */
 app.addEventListener('click',function(ev){
+  if(mode==='board'&&!ev.target.closest('button')){bdNext(1);return} // 큰 화면 순위표: 빈 곳을 누르면 다음 순위 공개
   var inner=ev.target.closest('#mapinner');
   if(noClick&&ev.target.closest('#mapbox'))return; // 지도를 끌거나 확대한 직후의 눌림은 무시
   if(inner&&mode==='edit'&&placing>-1&&!ev.target.closest('.pin')){
@@ -1017,8 +1089,18 @@ app.addEventListener('click',function(ev){
   if(b.dataset.act==='qedit'){qme.ok=false;render();return}
   if(b.dataset.act==='qsubmit'){if(!Q||!Q.questions)return;var left=Q.questions.length-qAnswered();
     if(!confirm((left?'아직 답하지 않은 문제가 '+left+'개 있어요. ':'')+'제출하면 고칠 수 없어요. 제출할까요?'))return;qSubmit();return}
+  /* 큰 화면 순위표 */
+  if(mode==='board'){var ba=b.dataset.act;
+    if(b.dataset.bdn){bd.n=+b.dataset.bdn;if(bd.step>-1)bd.step=0;render();return}
+    if(ba==='bdone'){bd.step=bd.step>-1?-1:0;bd.live=bd.live||bd.step===0;render();return}
+    if(ba==='bdmask'){bd.mask=!bd.mask;render();return}
+    if(ba==='bdlive'){bd.live=!bd.live;render();return}
+    if(ba==='bdfull'){bdFull();return}
+    if(ba==='bdclose'){try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}mode='edit';render();return}
+    return}
   /* 퀴즈: 선생님 */
   if(b.dataset.act==='qaretry'){qa.failed=false;qa.msg='';render();return}
+  if(b.dataset.act==='qaboard'&&mode==='edit'&&adminPw){mode='board';bd.R=null;bd.step=-1;bd.live=false;render();bdLoad();window.scrollTo({top:0});return}
   if(mode==='edit'&&qa.loaded){
     var qd=qa.draft,qp;
     if(b.dataset.qdmv!=null){qp=b.dataset.qdmv.split(':');var q1=+qp[0],q2=q1+(+qp[1]),qx=qd.questions[q1];qd.questions[q1]=qd.questions[q2];qd.questions[q2]=qx;render();return}
@@ -1073,7 +1155,12 @@ app.addEventListener('click',function(ev){
   if(b.dataset.place!=null){var pi=+b.dataset.place;placing=(placing===pi)?-1:pi;render();if(placing>-1){var mb2=document.getElementById('mapbox');if(mb2)mb2.scrollIntoView({behavior:'smooth',block:'center'})}return}
   if(b.dataset.unplace!=null){var u=draft.pins[+b.dataset.unplace];u.x=null;u.y=null;render();return}
 });
-document.addEventListener('keydown',function(ev){if(ev.key==='Escape'&&mapFull){mapFull=false;zoom=null;render()}});
+document.addEventListener('keydown',function(ev){if(ev.key==='Escape'&&mapFull){mapFull=false;zoom=null;render()}
+  if(mode==='board'){ // 큰 화면 순위표: 스페이스·→ 다음, ← 이전, F 전체 화면, Esc 닫기
+    if(ev.key===' '||ev.key==='ArrowRight'||ev.key==='Enter'){ev.preventDefault();bdNext(1)}
+    else if(ev.key==='ArrowLeft'){ev.preventDefault();bdNext(-1)}
+    else if(ev.key==='f'||ev.key==='F')bdFull();
+    else if(ev.key==='Escape'&&!document.fullscreenElement){mode='edit';render()}}});
 app.addEventListener('submit',function(ev){
   if(ev.target.id!=='loginform')return;ev.preventDefault();
   var pw=document.getElementById('pw').value;busy=true;loginErr='';render();
@@ -1128,11 +1215,11 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
   /* 새 화면이 배포되면 다시 접속만 해도 바뀌도록: 새 버전을 받으면 한 번 새로고침
      (선생님 수정 화면에서 편집 중이면 작성 내용이 날아가지 않게 수정 화면을 나갈 때까지 미룸) */
   var hadSW=!!navigator.serviceWorker.controller,reloading=false,needReload=false;
-  function freshReload(){if(reloading)return;if(mode==='edit'||qBusy()||qFlight||qs.pending){needReload=true;return}reloading=true;location.reload()} // 수정·퀴즈 푸는 중에는 끝날 때까지 미룸
+  function freshReload(){if(reloading)return;if(mode==='edit'||mode==='board'||qBusy()||qFlight||qs.pending){needReload=true;return}reloading=true;location.reload()} // 수정·퀴즈 푸는 중에는 끝날 때까지 미룸
   navigator.serviceWorker.addEventListener('controllerchange',function(){if(hadSW)freshReload();hadSW=true});
   navigator.serviceWorker.addEventListener('message',function(e){if(e.data&&e.data.type==='page-updated')freshReload()});
   window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(reg){
-    document.addEventListener('visibilitychange',function(){if(document.hidden)return;if(needReload&&mode!=='edit'&&!qBusy()){freshReload();return}reg.update().catch(function(){})});
+    document.addEventListener('visibilitychange',function(){if(document.hidden)return;if(needReload&&mode!=='edit'&&mode!=='board'&&!qBusy()){freshReload();return}reg.update().catch(function(){})});
   }).catch(function(){})});
 }
 })();
