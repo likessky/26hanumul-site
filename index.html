@@ -229,11 +229,15 @@ footer{color:var(--muted);font-size:12px;text-align:center}
 .qspace{height:56px}
 .qdone{justify-items:center;text-align:center}
 .qcode{font-size:56px;line-height:1.1;font-weight:800;letter-spacing:.12em}
-.qres{display:flex;gap:10px;align-items:flex-start}
-.qres i{font-style:normal;font-weight:800;flex:none}
-.qres.ok i{color:var(--ok)}.qres.no i{color:var(--danger-ink)}
+.qres{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:start;padding:8px 0;border-top:1px solid var(--line)}
+.qres>div{min-width:0;overflow-wrap:anywhere;word-break:keep-all}
+.qres b{display:block;font-weight:600}
+.qres i{font-style:normal;font-weight:800;font-size:18px;line-height:1.5}
+.qres.qo i{color:var(--ok)}.qres.qx i{color:var(--danger-ink)}
 .qres small{display:block;color:var(--muted);font-size:13px}
-.qtable{overflow-x:auto}
+.qtable{overflow-x:auto;min-width:0;max-width:100%}
+#qa-res{min-width:0;display:grid;gap:10px}
+.editor>.card,.card{min-width:0}
 .qtable table{border-collapse:collapse;width:100%;font-size:13px}
 .qtable th,.qtable td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;white-space:nowrap}
 .qid{display:grid;gap:10px}
@@ -596,7 +600,7 @@ function qCounting(){return !!(Q&&Q.status==='open'&&!Q.questions)}
 function qDelay(){
   /* 카운트다운 중: 공개 시각에 맞춰(0~0.3초 어긋나게) 바로 받고, 아직 안 왔으면 0.4초마다 다시 */
   if(qCounting()){var w=Q.openedAt-sNow();return w>0?Math.min(w,4000)+Math.random()*300:400}
-  var s=Q?Q.status:'off';return(s==='ready'?4:s==='open'?15:s==='closed'?20:30)*1000*(0.75+Math.random()*0.5)}
+  var s=Q?Q.status:'off';return(s==='ready'?4:s==='open'?6:s==='closed'?6:30)*1000*(0.75+Math.random()*0.5)}
 function qErrText(e){return{duplicate:'이 학번으로 이미 제출된 답이 있어요. 담임 선생님께 알려 주세요.',closed:'마감되어 제출되지 않았어요.',stale:'퀴즈가 새로 시작됐어요. 화면을 새로고침해 주세요.',bad_sid:'학번을 확인해 주세요.',bad_name:'이름을 확인해 주세요.',full:'제출이 가득 찼어요. 선생님께 알려 주세요.'}[e]||('제출하지 못했어요('+e+').')}
 function qBackupBtn(){var u=S.quizBackup||'';return /^https:\/\//.test(u)?'<a class="btn small primary" href="'+esc(u)+'" target="_blank" rel="noopener">예비 제출 열기</a>':''}
 function qRetryLater(){
@@ -668,7 +672,7 @@ function qResult(){
     var ok=qGrade(i);if(ok)sc++;var a=qs.ans[i],mine,right;
     if(q.type==='choice'){mine=(a==null||a==='')?'(답 안 함)':CIRC.charAt(+a)+' '+(q.choices[+a]||'');right=CIRC.charAt(q.answer)+' '+(q.choices[q.answer]||'')}
     else{mine=(a==null||a==='')?'(답 안 함)':String(a);right=(q.answer||[]).join(' / ')}
-    return '<div class="qres '+(ok?'ok':'no')+'"><i>'+(ok?'O':'X')+'</i><div>'+(i+1)+'번 · 내 답: '+esc(mine)+(ok?'':'<small>정답: '+esc(right)+'</small>')+'</div></div>'}).join('');
+    return '<div class="qres '+(ok?'qo':'qx')+'"><i>'+(ok?'O':'X')+'</i><div><b>'+(i+1)+'번'+(q.text?' · '+esc(q.text):'')+'</b>내 답: '+esc(mine)+(ok?'':'<small>정답: '+esc(right)+'</small>')+'</div></div>'}).join('');
   return '<div class="card"><h3>내 결과 · '+sc+' / '+n+'</h3>'+(qs.submitted?'':'<p class="callout">제출하지 않아 순위에는 들어가지 않아요.</p>')+rows+'</div>'}
 function qCdText(){var s=Math.ceil((Q.openedAt-sNow())/1000);return s>0?s+'':'공개!'}
 function qCountCard(){
@@ -708,12 +712,15 @@ function qaLoad(){
   qapi({action:'qget'}).then(function(r){qa.loading=false;
     if(r.ok){qa.loaded=true;qa.failed=false;qa.state=r.state;qa.draft=r.def?qToDraft(r.def):{title:'',questions:[]};qaTimer()}else{qa.failed=true;qa.msg=errText(r.error)}
     if(mode==='edit')render();
+    if(r.ok&&(r.state.status==='open'||r.state.status==='closed'))qaResults(true); // 진행·마감 중이면 순위표를 바로 보여 줌
   }).catch(function(){qa.loading=false;qa.failed=true;qa.msg=errText('network');if(mode==='edit')render()});
 }
-function qaTimer(){ // 진행 중에는 제출 수를 5초마다 확인
-  if(qa.timer)return;
+function qaTimer(){ // 진행 중에는 제출 수 5초마다, 순위표 10초마다 확인 (선생님 한 명만 부르므로 부담 없음)
+  if(qa.timer)return;var tick=0;
   qa.timer=setInterval(function(){
     if(mode!=='edit'||document.hidden||!qa.state||(qa.state.status!=='open'&&qa.state.status!=='closed'))return;
+    tick++;
+    if(qa.state.status==='open'&&qa.results&&tick%2===0){qaResults(true);return}
     qapi({action:'qcount'}).then(function(r){if(r.ok){qa.count=r.n;var e=document.getElementById('qcount-a');if(e)e.textContent=r.n}}).catch(function(){});
   },5000);
 }
@@ -734,8 +741,12 @@ function qaStatus(body,ask){
   if(qa.busy)return;if(ask&&!confirm(ask))return;
   qa.busy=true;qa.msg='처리 중…';render();
   qapi(body).then(function(r){qa.busy=false;
-    if(r.ok){qa.state=r.state;if(body.action==='qnew'){qa.results=null;qa.count=0}qa.msg='반영했어요. 학생 화면에는 몇 초 안에 반영돼요.'}else qa.msg=errText(r.error);
-    render()}).catch(function(){qa.busy=false;qa.msg=errText('network');render()});
+    if(r.ok){qa.state=r.state;if(body.action==='qnew'){qa.results=null;qa.count=0}
+      qa.msg=body.status==='closed'?'마감했어요. 아래 순위표를 확인한 뒤 "결과 공개"를 눌러 주세요. (마감 뒤 2분 동안 늦게 도착한 제출이 더 들어올 수 있어요)':
+        body.reveal===true?'학생 화면에 점수와 정답을 공개했어요. 몇 초 안에 나타나요.':'반영했어요. 학생 화면에는 몇 초 안에 나타나요.'}else qa.msg=errText(r.error);
+    render();
+    if(r.ok&&(body.status==='closed'||body.status==='open'))qaResults(true); // 마감하면 순위표가 바로 뜸
+  }).catch(function(){qa.busy=false;qa.msg=errText('network');render()});
 }
 function qResize(file){return new Promise(function(res,rej){
   var u=URL.createObjectURL(file),im=new Image();
@@ -751,9 +762,13 @@ function qaImg(i,file){
     if(r.ok){qa.draft.questions[i].img=r.key;qa.msg='그림을 올렸어요. 아래 "퀴즈 저장"을 눌러야 반영돼요.'}else qa.msg=errText(r.error);render();
   }).catch(function(){qa.msg='그림을 올리지 못했어요. 다른 사진으로 해 보세요.';render()});
 }
-function qaResults(){
-  qa.msg='결과를 불러오는 중…';render();
-  qapi({action:'qresults'}).then(function(r){if(r.ok){qa.results=r;qa.msg=''}else qa.msg=errText(r.error);render()}).catch(function(){qa.msg=errText('network');render()});
+function qaResults(quiet){
+  if(qa.resLoading)return;qa.resLoading=true;
+  qapi({action:'qresults'}).then(function(r){qa.resLoading=false;
+    if(r.ok){var d=new Date();r.at=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');qa.results=r;qa.count=r.total;var c=document.getElementById('qcount-a');if(c)c.textContent=r.total}
+    else if(!quiet){qa.msg=errText(r.error);render();return}
+    qaResPaint();
+  }).catch(function(){qa.resLoading=false;if(!quiet){qa.msg=errText('network');render()}});
 }
 /* 서버 점검: ① 저장소(Redis) 응답 시간 ② 학생 요청을 버셀 CDN이 대신 받아 주는지(x-vercel-cache) */
 function qaHealth(){
@@ -775,6 +790,20 @@ function qaCsv(){
   var csv='﻿'+rows.map(function(r){return r.map(csvCell).join(',')}).join('\r\n');
   var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='quiz-results.csv';document.body.appendChild(a);a.click();a.remove();
 }
+/* 선생님 전용 순위표: 진행 중에는 10초마다 저절로 새로고침, 마감하면 자동으로 뜸. 학생에게는 "결과 공개"를 눌러야 보임 */
+function qaResHtml(){
+  var st=qa.state||{},s=st.status,R=qa.results,live=(s==='open'||s==='closed');
+  var head='<h3 style="margin-top:6px">순위표 <span style="font-weight:400;color:var(--muted);font-size:14px">(선생님만 보여요'+(s==='closed'&&!st.reveal?' · 학생에게는 아직 공개 전':'')+(s==='closed'&&st.reveal?' · 학생에게 공개 중':'')+')</span></h3>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn small" data-act="qaresults">'+(R?'지금 새로고침':'순위표 보기')+'</button>'+(R?'<button class="btn small" data-act="qacsv">CSV 내려받기</button>':'')+(live&&R?'<span style="font-size:13px;color:var(--muted)">'+(s==='open'?'진행 중에는 10초마다 저절로 새로고침돼요':'')+(R.at?' · '+R.at+' 기준':'')+'</span>':'')+'</div>';
+  if(!R)return head;
+  var full=R.rows.filter(function(r){return r.score===R.n}).length;
+  var right=(R.right||[]).map(function(c,i){return(i+1)+'번 '+(R.total?Math.round(c*100/R.total):0)+'%'}).join(' · ');
+  var rows=R.rows.map(function(r,i){var top=i<3?' style="font-weight:700"':'';return '<tr'+top+'><td>'+(i+1)+'</td><td>'+esc(r.sid)+'</td><td>'+esc(r.name)+'</td><td>'+r.score+' / '+R.n+'</td><td>'+(r.el/1000).toFixed(1)+'초</td><td>'+(r.ce/1000).toFixed(1)+'초</td><td>'+r.tries+'</td><td class="mono">'+esc(r.code)+'</td></tr>'}).join('');
+  return head+'<p class="callout">제출 <b>'+R.total+'</b>명 · 만점 <b>'+full+'</b>명 · 순위 = 점수 높은 순 → 같으면 문제 공개 시각부터 빨리 낸 순'+(right?'<br>문항별 정답률: '+right:'')+'</p>'+
+    (R.total?'<div class="qtable" style="max-height:440px;overflow:auto;border:1px solid var(--line);border-radius:8px"><table><thead><tr><th>순위</th><th>학번</th><th>이름</th><th>점수</th><th>걸린 시간</th><th>폰 측정</th><th>재시도</th><th>접수번호</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<p class="callout">아직 제출한 학생이 없어요.</p>')+
+    (R.dups&&R.dups.length?'<p class="callout">같은 학번으로 다시 제출하려던 기록 '+R.dups.length+'건: '+R.dups.slice(0,10).map(function(x){return esc(x.sid)+' '+esc(x.name)}).join(', ')+'</p>':'');
+}
+function qaResPaint(){var e=document.getElementById('qa-res');if(e)e.innerHTML=qaResHtml()} // 순위표만 바꿔서 다른 입력칸은 그대로
 function quizCard(){
   if(!qa.loaded){
     if(!qa.loading&&!qa.failed)qaLoad();
@@ -799,19 +828,12 @@ function quizCard(){
     return '<div class="qedit"><div class="ops" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><b>'+(i+1)+'번</b><select data-qtype="'+i+'" aria-label="'+(i+1)+'번 종류"'+(locked?' disabled':'')+'><option value="choice"'+(q.type==='choice'?' selected':'')+'>객관식</option><option value="short"'+(q.type==='short'?' selected':'')+'>단답형</option></select><span class="sp" style="flex:1"></span>'+
       '<button class="btn small" data-qdmv="'+i+':-1"'+(locked||i===0?' disabled':'')+'>위로</button><button class="btn small" data-qdmv="'+i+':1"'+(locked||i===d.questions.length-1?' disabled':'')+'>아래로</button><button class="btn small" data-qddel="'+i+'"'+(locked?' disabled':'')+'>삭제</button></div>'+
       '<div class="field"><label for="qa-t'+i+'">문제 글 (비우면 학생 휴대폰에는 번호와 답안칸만 나와요)</label><textarea id="qa-t'+i+'" data-qd="'+i+'" data-k="text" style="min-height:80px"'+(locked?' disabled':'')+'>'+esc(q.text)+'</textarea></div>'+im+opt+'</div>'}).join('');
-  var res='';
-  if(qa.results){var R=qa.results;
-    res='<p class="callout">제출 '+R.total+'명 · 문제 '+R.n+'개 · 점수가 높고 걸린 시간이 짧은 순</p><div class="qtable"><table><thead><tr><th>순위</th><th>학번</th><th>이름</th><th>점수</th><th>걸린 시간</th><th>폰 측정</th><th>재시도</th><th>접수번호</th></tr></thead><tbody>'+
-      R.rows.slice(0,30).map(function(r,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(r.sid)+'</td><td>'+esc(r.name)+'</td><td>'+r.score+'</td><td>'+(r.el/1000).toFixed(1)+'초</td><td>'+(r.ce/1000).toFixed(1)+'초</td><td>'+r.tries+'</td><td class="mono">'+esc(r.code)+'</td></tr>'}).join('')+'</tbody></table></div>'+
-      (R.rows.length>30?'<p class="callout">상위 30명만 보여요. 전체는 CSV로 내려받아요.</p>':'')+
-      (R.dups&&R.dups.length?'<p class="callout">같은 학번으로 다시 제출하려던 기록 '+R.dups.length+'건: '+R.dups.slice(0,10).map(function(x){return esc(x.sid)+' '+esc(x.name)}).join(', ')+'</p>':'')+
-      '<div><button class="btn" data-act="qacsv">CSV 내려받기</button></div>';
-  }
   return '<div class="card"><h3>퀴즈</h3>'+
     '<p class="callout">현재 상태: <b>'+label+'</b>'+(s==='open'||s==='closed'?' · 제출 <b id="qcount-a">'+(qa.count==null?'…':qa.count)+'</b>명':'')+'</p>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap">'+ctl+'</div>'+
-    '<p class="callout">흐름: 새 회차(대기) → 학생이 학번 입력 → ▶ 시작 → ■ 마감(마감 뒤 2분까지는 늦게 도착한 제출도 받아요) → 결과 공개. 이 카드는 아래 "저장"과 상관없이 바로 반영돼요.</p>'+
+    '<p class="callout">흐름: 새 회차(대기) → 학생이 학번 입력 → ▶ 시작 → ■ 마감 → <b>순위표 확인</b> → 결과 공개. 이 카드의 버튼은 누르는 즉시 서버에 반영되고, 학생 화면에는 몇 초 안에 나타나요. (맨 아래 "저장" 버튼은 누를 필요 없어요)</p>'+
     (qa.msg?'<p class="callout" role="status">'+esc(qa.msg)+'</p>':'')+
+    '<div id="qa-res">'+qaResHtml()+'</div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn small" data-act="qahealth">서버 점검</button><span style="font-size:13px;color:var(--muted)">행사 전과 시작 직전에 눌러 확인해요</span></div>'+
     (qa.health?'<p class="callout" style="white-space:pre-line">'+esc(qa.health)+'</p>':'')+
     '<p class="callout">퀴즈 서버가 안 될 때: 아래 <b>기본 정보 → 퀴즈 예비 제출 안내</b>를 "켜기"로 바꾸고 저장하면 1~3분 안에 학생 퀴즈 화면에 예비 제출(구글 설문) 버튼이 크게 떠요. 이 방법은 퀴즈 서버와 상관없이 작동해요.</p>'+
@@ -820,7 +842,7 @@ function quizCard(){
     '<div class="erows">'+qh+'</div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-act="qdadd"'+(locked||d.questions.length>=30?' disabled':'')+'>문제 추가</button><button class="btn" data-act="qasample"'+(locked?' disabled':'')+'>기본 문제 5개 불러오기</button><button class="btn primary" data-act="qasave"'+(locked||qa.busy?' disabled':'')+'>퀴즈 저장</button></div>'+
     '<p class="callout">객관식은 보기 2~5개, 단답형은 인정하는 답을 쉼표로 여러 개 적을 수 있어요. 띄어쓰기·대소문자·문장부호 차이는 무시하고 채점해요. 그림은 휴대폰에서 자동으로 줄여서 올려요(문제 그림은 합쳐서 1MB 이하 권장).</p>'+
-    '<h3 style="margin-top:6px">결과</h3><div><button class="btn" data-act="qaresults">결과 불러오기</button></div>'+res+'</div>';
+    '</div>';
 }
 
 /* ---------- login ---------- */
@@ -1015,7 +1037,8 @@ app.addEventListener('click',function(ev){
     if(qa2==='qaclose'){qaStatus({action:'qstatus',status:'closed'},'퀴즈를 마감할까요? (마감 뒤 2분까지는 늦게 도착한 제출도 받아요)');return}
     if(qa2==='qareopen'){qaStatus({action:'qstatus',status:'open'},'마감한 퀴즈를 다시 열까요?');return}
     if(qa2==='qaoff'){qaStatus({action:'qstatus',status:'off'},'학생 화면에서 퀴즈를 숨길까요?');return}
-    if(qa2==='qareveal'){qaStatus({action:'qstatus',reveal:!qa.state.reveal},qa.state.reveal?'':'점수와 정답을 학생에게 공개할까요?');return}
+    if(qa2==='qareveal'){var RR=qa.results,sum=RR&&RR.rows.length?'\n\n제출 '+RR.total+'명 · 1위 '+RR.rows[0].sid+' '+RR.rows[0].name+' ('+RR.rows[0].score+'점, '+(RR.rows[0].el/1000).toFixed(1)+'초)':'';
+      qaStatus({action:'qstatus',reveal:!qa.state.reveal},qa.state.reveal?'':'순위표를 확인하셨나요? 학생 화면에 각자의 점수와 정답을 공개할까요?'+sum);return}
     if(qa2==='qaresults'){qaResults();return}
     if(qa2==='qahealth'){qaHealth();return}
     if(qa2==='qacsv'){if(qa.results)qaCsv();return}
@@ -1089,7 +1112,7 @@ setInterval(function(){if(mode==='view'&&tab!=='map'&&tab!=='quiz'&&!document.hi
 /* 공지는 아주 작은 파일이라 1분(±25%)마다 확인. 화면이 꺼져 있으면 건너뜀 */
 (function pollA(){setTimeout(function(){if(!document.hidden)loadAnn();pollA()},ANN_MS*(0.75+Math.random()*0.5))})();
 (function poll(){setTimeout(function(){if(!document.hidden)load();poll()},POLL_MS*(0.75+Math.random()*0.5))})();
-/* 퀴즈: 보고 있을 때만 상태 확인 (대기 3초 · 진행 15초 · 마감 20초 · 숨김 30초, 사람마다 어긋나게). 제출 못 한 답은 다시 보냄 */
+/* 퀴즈: 보고 있을 때만 상태 확인 (대기 4초 · 진행·마감 6초 · 숨김 30초, 사람마다 어긋나게. 카운트다운 중에는 공개 시각에 맞춰 받음). 제출 못 한 답은 다시 보냄 */
 var qPollT=0;
 function qSched(){clearTimeout(qPollT);qPollT=setTimeout(function(){if(tab==='quiz'&&mode==='view'&&!document.hidden)qLoad();qSched()},qDelay())} // 상태를 새로 받을 때마다 그 상태에 맞는 간격으로 다시 걺
 qSched();

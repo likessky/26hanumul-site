@@ -272,13 +272,15 @@ module.exports = async function handler(req, res) {
     if (body.action === 'qresults') {
       if (!state.id) return res.status(200).json({ ok: true, rows: [], dups: [], total: 0 });
       const [flat, dl] = await pipe([['HGETALL', K.sub(state.id)], ['LRANGE', K.dup(state.id), 0, 499]]);
-      const rows = [];
+      const rows = [], nq = def ? def.questions.length : 0, right = new Array(nq).fill(0);
       for (let i = 1; i < flat.length; i += 2) {
         const r = jparse(flat[i], null);
-        if (r) rows.push({ sid: r.sid, name: r.name, score: r.score, el: r.el, ce: r.ce, tries: r.tries, code: r.code, t: r.t });
+        if (!r) continue;
+        rows.push({ sid: r.sid, name: r.name, score: r.score, el: r.el, ce: r.ce, tries: r.tries, code: r.code, t: r.t });
+        (r.ok || []).forEach((v, k) => { if (v && k < nq) right[k]++; });
       }
       rank(rows);
-      return res.status(200).json({ ok: true, total: rows.length, n: def ? def.questions.length : 0, rows, dups: dl.map((x) => jparse(x, {})) });
+      return res.status(200).json({ ok: true, total: rows.length, n: nq, rows, right, dups: dl.map((x) => jparse(x, {})) });
     }
 
     return res.status(400).json({ ok: false, error: 'unknown_action' });
