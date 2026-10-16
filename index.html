@@ -594,8 +594,8 @@ function qLoad(){
 function sNow(){return Date.now()+qOff}
 function qCounting(){return !!(Q&&Q.status==='open'&&!Q.questions)}
 function qDelay(){
-  /* 카운트다운 중: 공개 시각에 맞춰(0~0.3초 어긋나게) 바로 받고, 아직 안 왔으면 0.7초마다 다시 */
-  if(qCounting()){var w=Q.openedAt-sNow();return w>0?Math.min(w,4000)+Math.random()*300:700}
+  /* 카운트다운 중: 공개 시각에 맞춰(0~0.3초 어긋나게) 바로 받고, 아직 안 왔으면 0.4초마다 다시 */
+  if(qCounting()){var w=Q.openedAt-sNow();return w>0?Math.min(w,4000)+Math.random()*300:400}
   var s=Q?Q.status:'off';return(s==='ready'?4:s==='open'?15:s==='closed'?20:30)*1000*(0.75+Math.random()*0.5)}
 function qErrText(e){return{duplicate:'이 학번으로 이미 제출된 답이 있어요. 담임 선생님께 알려 주세요.',closed:'마감되어 제출되지 않았어요.',stale:'퀴즈가 새로 시작됐어요. 화면을 새로고침해 주세요.',bad_sid:'학번을 확인해 주세요.',bad_name:'이름을 확인해 주세요.',full:'제출이 가득 찼어요. 선생님께 알려 주세요.'}[e]||('제출하지 못했어요('+e+').')}
 function qBackupBtn(){var u=S.quizBackup||'';return /^https:\/\//.test(u)?'<a class="btn small primary" href="'+esc(u)+'" target="_blank" rel="noopener">예비 제출 열기</a>':''}

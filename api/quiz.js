@@ -156,7 +156,8 @@ module.exports = async function handler(req, res) {
       if (waiting) delete out.questions;
       res.setHeader('Cache-Control', 'public, max-age=1'); // 브라우저는 1초만 기억
       // 버셀 CDN은 평소 2초, 카운트다운 중에는 1초(공개 순간을 놓치지 않게). 서버 오류 때는 10분까지 마지막 정상 응답
-      res.setHeader('Vercel-CDN-Cache-Control', `max-age=${waiting ? 1 : 2}, stale-if-error=600`);
+      // 공개 1.5초 전부터는 "아직 문제 없음" 응답을 CDN에 남기지 않음 → 0초에 받은 요청이 바로 문제를 받음
+      res.setHeader('Vercel-CDN-Cache-Control', waiting && pub.openedAt - now < 1500 ? 'no-store' : `max-age=${waiting ? 1 : 2}, stale-if-error=600`);
       return res.status(200).json(out);
     }
 
