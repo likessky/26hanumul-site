@@ -1289,7 +1289,10 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
   var hadSW=!!navigator.serviceWorker.controller,reloading=false,needReload=false;
   function freshReload(){if(reloading)return;if(mode==='edit'||mode==='board'||qBusy()||qFlight||qs.pending){needReload=true;return}reloading=true;location.reload()} // 수정·퀴즈 푸는 중에는 끝날 때까지 미룸
   navigator.serviceWorker.addEventListener('controllerchange',function(){if(hadSW)freshReload();hadSW=true});
-  navigator.serviceWorker.addEventListener('message',function(e){if(e.data&&e.data.type==='page-updated')freshReload()});
+  navigator.serviceWorker.addEventListener('message',function(e){if(!e.data)return;
+    if(e.data.type==='page-updated')freshReload();
+    if(e.data.type==='hello'&&e.source){try{e.source.postMessage({type:'hello-ack'})}catch(x){}}}); // 새 화면이라고 답해서 강제 새로 열기를 피함 (sw.js의 wakeOldPages)
+  try{navigator.serviceWorker.startMessages()}catch(e){}
   window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(reg){
     document.addEventListener('visibilitychange',function(){if(document.hidden)return;if(needReload&&mode!=='edit'&&mode!=='board'&&!qBusy()){freshReload();return}reg.update().catch(function(){})});
   }).catch(function(){})});

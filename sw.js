@@ -4,14 +4,14 @@
  * 지도(map.jpg, 약 1MB)는 따로 보관해서 VERSION을 올려도 다시 받지 않아요.
  * 지도 이미지를 바꿀 때만 MAP_CACHE 숫자를 올려 주세요.
  */
-const VERSION = 'hanumul-v20';
+const VERSION = 'hanumul-v21';
 const MAP_CACHE = 'hanumul-map-1';
 const CORE = ['./', 'index.html', 'emblem.png', 'manifest.webmanifest', 'icon-192.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil((async () => {
     const c = await caches.open(VERSION);
-    await c.addAll(CORE);
+    await c.addAll(CORE.map((u) => new Request(u, { cache: 'reload' }))); // 브라우저에 남은 예전 화면 말고 서버의 새 화면을 저장
     await c.add('data.json').catch(() => {});
     const m = await caches.open(MAP_CACHE);
     // 브라우저에 남은 예전 응답(404 등)을 쓰지 않고 서버에서 새로 받음
@@ -25,7 +25,32 @@ self.addEventListener('activate', (e) => {
     for (const k of await caches.keys()) if (k !== VERSION && k !== MAP_CACHE) await caches.delete(k);
     await self.clients.claim();
   })());
+  wakeOldPages(); // 활성화를 늦추지 않도록 기다리지 않고 따로 진행
 });
+
+/* 예전 화면 깨우기
+ * 10/15 오후 이전 화면에는 "새 버전이 나오면 스스로 새로고침"하는 코드가 없어서,
+ * 휴대폰이 백그라운드에서 되살린 예전 화면은 퀴즈 탭이 없는 채로 남아 있어요.
+ * 새 화면은 'hello'에 'hello-ack'로 답하므로, 답하지 않는 창만 골라 한 번 새로 열어요.
+ * (새 화면은 원래대로 스스로 새로고침하고, 수정·퀴즈 중이면 끝날 때까지 미뤄요) */
+const acks = new Set();
+self.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'hello-ack' && e.source) acks.add(e.source.id);
+});
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+async function wakeOldPages() {
+  try {
+    await wait(3000); // 스스로 새로고침하는 화면은 먼저 새로고침하도록
+    const list = await self.clients.matchAll({ type: 'window' });
+    list.forEach((c) => { try { c.postMessage({ type: 'hello' }); } catch (x) {} });
+    await wait(2500);
+    for (const c of await self.clients.matchAll({ type: 'window' })) {
+      if (acks.has(c.id) || !list.some((x) => x.id === c.id)) continue;
+      if (new URL(c.url).origin !== self.location.origin) continue;
+      try { await c.navigate(c.url); } catch (x) {}
+    }
+  } catch (x) {}
+}
 
 function timeout(ms) { return new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms)); }
 
