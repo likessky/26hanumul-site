@@ -371,6 +371,7 @@ footer{color:var(--muted);font-size:12px;text-align:center}
 "mapLink":"https://seoulland.co.kr/?p=13&type=attraction&key=&idx=59",
 "quizBackup":"",
 "quizBackupOn":"",
+"hideSchedule":"",
 "program":[
   {"type":"개회식","title":"안전 및 학교폭력예방교육 영상 시청 (비상 대피요령 포함)"},
   {"type":"공식행사","title":"교장선생님 개회사 및 내빈 소개, 학교운영위원장님 축사"},
@@ -613,11 +614,14 @@ function netChip(){
   var t=online?(lastSync?'최신 안내 · '+hm(new Date(lastSync).getHours()*60+new Date(lastSync).getMinutes()):'저장된 안내'):'오프라인 · 저장된 안내';
   return'<span class="netchip'+(online?'':' off')+'"><i></i>'+t+'</span>';
 }
+/* 선생님이 "식순 탭 숨기기"를 켜면 식순 탭을 빼고 보여 줌 (기본 정보에서 켜고 끔) */
+function visTabs(){return TABS.filter(function(t){return!(t[0]==='schedule'&&S.hideSchedule==='on')})}
 function renderInner(){
   if(mode==='login')return renderLogin();
   if(mode==='edit')return renderEditor();
   if(mode==='board')return renderBoard();
   var st=status(),v;
+  if(S.hideSchedule==='on'&&tab==='schedule')tab='quiz'; // 식순 탭을 숨긴 동안에는 퀴즈 탭이 첫 화면
   if(tab!=='map')mapFull=false;
   if(tab==='schedule')v=vSchedule(st);else if(tab==='safety')v=vSafety();else if(tab==='map')v=vMap();else if(tab==='free')v=vFree(st);else if(tab==='quiz')v=vQuiz();else v=vHelp();
   var upd=updatedAt?(function(){var d=new Date(updatedAt);return isNaN(d)?'':' · '+(d.getMonth()+1)+'/'+d.getDate()+' '+hm(d.getHours()*60+d.getMinutes())+' 수정본'})():'';
@@ -632,7 +636,7 @@ function renderInner(){
    '<section class="view">'+v+'</section>'+
    '<div class="toolbar"><span>현재 시각 <span class="mono">'+hm(nowMin())+'</span> 기준'+upd+'</span><button class="btn small" data-act="login">선생님 수정</button></div>'+
    '<footer>'+esc(S.school)+' · '+esc(S.title)+' 운영 안내</footer></div>'+
-   '<nav class="nav" role="tablist" aria-label="안내 메뉴"><div>'+TABS.map(function(t){return'<button class="tab" role="tab" data-tab="'+t[0]+'" aria-selected="'+(tab===t[0])+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+ICON[t[0]]+'</svg>'+t[1]+(t[0]==='quiz'&&qb&&tab!=='quiz'?'<i class="qdot" aria-label="퀴즈 알림"></i>':'')+'</button>'}).join('')+'</div></nav>';
+   '<nav class="nav" role="tablist" aria-label="안내 메뉴"><div style="grid-template-columns:repeat('+visTabs().length+',1fr)">'+visTabs().map(function(t){return'<button class="tab" role="tab" data-tab="'+t[0]+'" aria-selected="'+(tab===t[0])+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+ICON[t[0]]+'</svg>'+t[1]+(t[0]==='quiz'&&qb&&tab!=='quiz'?'<i class="qdot" aria-label="퀴즈 알림"></i>':'')+'</button>'}).join('')+'</div></nav>';
   wireMap();
 }
 var drag=null,pinch=null,noClick=false;
@@ -1105,6 +1109,7 @@ function renderEditor(){
    '<div class="sec-h"><h2>식순·안내 수정</h2><p>맨 위 공지는 바로 보내져요. 아래 내용은 저장하면 사이트가 새로 배포되고(약 1분), 학생 화면에는 그 뒤 3분 안에 반영돼요.</p></div>'+
    annCard()+
    '<div class="card"><h3>기본 정보</h3><div class="grid2">'+f('s-date','행사 날짜',d.date,'date')+f('s-venue','장소',d.venue)+f('s-start','공연 시작',d.start,'time')+f('s-morningTime','아침 집결 시각',d.morningTime,'time')+f('s-morningPlace','아침 집결 장소',d.morningPlace)+f('s-meetTime','퇴장 집결 시각 (체험 종료)',d.meetTime,'time')+f('s-meetPlace','퇴장 집결 장소',d.meetPlace)+f('s-homeNote','귀가 방법',d.homeNote)+f('s-quizBackup','퀴즈 예비 제출 주소 (구글 설문 링크, 선택)',d.quizBackup||'')+
+   '<div class="field"><label for="s-hideSchedule">식순 탭 숨기기 (학생 테스트 등 잠시 가릴 때)</label><select id="s-hideSchedule" data-s="hideSchedule"><option value=""'+(d.hideSchedule==='on'?'':' selected')+'>보이기 (평소)</option><option value="on"'+(d.hideSchedule==='on'?' selected':'')+'>숨기기 → 첫 화면이 퀴즈 탭</option></select></div>'+
    '<div class="field"><label for="s-quizBackupOn">퀴즈 예비 제출 안내 (퀴즈 서버 장애 때만 켜기)</label><select id="s-quizBackupOn" data-s="quizBackupOn"><option value=""'+(d.quizBackupOn==='on'?'':' selected')+'>끄기 (평소)</option><option value="on"'+(d.quizBackupOn==='on'?' selected':'')+'>켜기 → 학생 화면에 예비 제출 버튼</option></select></div></div></div>'+
    '<div class="card"><h3>비상 연락처</h3><div class="erows">'+crow+'</div><button class="btn" data-act="cadd">연락처 추가</button></div>'+
    '<div class="card"><h3>지도 위치 표시</h3><p class="callout">"지도에서 위치 찍기"를 누른 뒤 아래 지도에서 그 장소를 누르면 번호가 표시돼요.</p><div class="erows">'+prow+'</div><button class="btn" data-act="madd">위치 추가</button>'+mapBlock(d.pins,{placing:placing>-1})+'</div>'+

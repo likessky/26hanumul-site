@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-16T00:47:15.811Z",
+ "updated": "2026-10-16T05:31:47.383Z",
  "data": {
   "school": "금정중학교",
   "title": "한우물제",
@@ -14,6 +14,7 @@
   "mapLink": "https://seoulland.co.kr/?p=13&type=attraction&key=&idx=59",
   "quizBackup": "",
   "quizBackupOn": "",
+  "hideSchedule": "on",
   "program": [
    {
     "type": "개회식",
